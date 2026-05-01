@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XAU/USD Master Scalper AI</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --text-color: #c9d1d9;
+            --accent-color: #e3b341; /* Gold */
+            --border-color: #30363d;
+            --user-msg: #1f6feb;
+            --ai-msg: #238636;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+        }
+
+        header {
+            background-color: var(--panel-bg);
+            padding: 15px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--accent-color);
+        }
+
+        #api-key-container {
+            display: flex;
+            gap: 10px;
+        }
+
+        input[type="password"], input[type="text"] {
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 8px 12px;
+            border-radius: 6px;
+            outline: none;
+        }
+
+        input[type="password"]:focus, input[type="text"]:focus {
+            border-color: var(--accent-color);
+        }
+
+        #chat-container {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .message {
+            max-width: 80%;
+            padding: 12px 16px;
+            border-radius: 8px;
+            line-height: 1.5;
+            word-wrap: break-word;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background-color: var(--user-msg);
+            color: white;
+        }
+
+        .message.ai {
+            align-self: flex-start;
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            white-space: pre-wrap; /* Preserves formatting */
+        }
+
+        .message img {
+            max-width: 100%;
+            border-radius: 4px;
+            margin-top: 10px;
+            display: block;
+        }
+
+        #input-container {
+            background-color: var(--panel-bg);
+            padding: 15px 20px;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            gap: 10px;
+            align-items: flex-end;
+        }
+
+        textarea {
+            flex: 1;
+            background-color: var(--bg-color);
+            border: 1px solid var(--border-color);
+            color: var(--text-color);
+            padding: 12px;
+            border-radius: 6px;
+            resize: none;
+            outline: none;
+            font-family: inherit;
+            min-height: 24px;
+            max-height: 150px;
+        }
+
+        textarea:focus {
+            border-color: var(--accent-color);
+        }
+
+        button {
+            background-color: var(--accent-color);
+            color: #000;
+            border: none;
+            padding: 10px 16px;
+            border-radius: 6px;
+            font-weight: bold;
+            cursor: pointer;
+            height: 100%;
+            transition: opacity 0.2s;
+        }
+
+        button:hover {
+            opacity: 0.8;
+        }
+
+        button:disabled {
+            background-color: var(--border-color);
+            color: #8b949e;
+            cursor: not-allowed;
+        }
+
+        .file-upload-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-upload-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            cursor: pointer;
+        }
+        
+        #image-preview {
+            display: none;
+            max-height: 60px;
+            border-radius: 4px;
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <h1>XAU/USD Sniper Terminal</h1>
+        <div id="api-key-container">
+            <input type="password" id="api-key" placeholder="Enter Gemini API Key">
+        </div>
+    </header>
+
+    <div id="chat-container">
+        <div class="message ai">
+            <strong>System:</strong> Terminal Initialized. Awaiting your API Key. Once entered, I will acknowledge the Master Scalper instructions and tell you which timeframes to send.
+        </div>
+    </div>
+
+    <div id="input-container">
+        <img id="image-preview" src="" alt="Preview">
+        <div class="file-upload-wrapper">
+            <button type="button">📎 Chart</button>
+            <input type="file" id="image-input" accept="image/png, image/jpeg, image/webp">
+        </div>
+        <textarea id="user-input" placeholder="Message the Scalper AI..." rows="1"></textarea>
+        <button id="send-btn">Send</button>
+    </div>
+
+    <script>
+        const chatContainer = document.getElementById('chat-container');
+        const userInput = document.getElementById('user-input');
+        const sendBtn = document.getElementById('send-btn');
+        const apiKeyInput = document.getElementById('api-key');
+        const imageInput = document.getElementById('image-input');
+        const imagePreview = document.getElementById('image-preview');
+
+        // The exact system prompt provided by the user
+        const systemInstruction = `Act as a Master Gold (XAU/USD) Scalper. We are starting with a $50 balance. Our risk per trade is strictly $2.50 (5%). You must provide precise signals for the MT5 app.
+Your Strategy:
+You are a 'Sniper' trader. You only enter when market structure, liquidity, and volume align. You must use tight Stop Losses, but they must be realistic for Gold's volatility.
+Your Instructions:
+Preparation: Tell me exactly which timeframes (e.g., M15 for trend, M1 or M5 for entry) I need to screenshot and send you to get a high-accuracy trade.
+Analysis: When I send the photos, look for Fair Value Gaps and Order Blocks.
+The Signal: Provide a clear MT5 setup:
+Position: (Buy/Sell)
+Entry Price:
+Stop Loss (SL): (Keep the risk at exactly $2.50 using 0.01 or 0.02 lots)
+Take Profit (TP): (Aim for at least 1:2 or 1:3 ratio)
+Constraint: If the market is too 'choppy' or high-risk for a $50 account, you MUST tell me to wait.
+Acknowledge this and tell me which timeframes to send you first.`;
+
+        let chatHistory = [];
+        let base64Image = null;
+        let mimeType = null;
+        let isFirstMessage = true;
+
+        // Auto-resize textarea
+        userInput.addEventListener('input', function() {
+            this.style.height = 'auto';
+            this.style.height = (this.scrollHeight) + 'px';
+        });
+
+        // Handle Image Selection
+        imageInput.addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                mimeType = file.type;
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    base64Image = event.target.result.split(',')[1];
+                    imagePreview.src = event.target.result;
+                    imagePreview.style.display = 'block';
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+
+        function addMessage(text, sender, imgSrc = null) {
+            const div = document.createElement('div');
+            div.className = `message ${sender}`;
+            
+            let content = text ? text : '';
+            if (imgSrc) {
+                content += `<img src="${imgSrc}" alt="Chart Screenshot">`;
+            }
+            
+            div.innerHTML = content;
+            chatContainer.appendChild(div);
+            chatContainer.scrollTop = chatContainer.scrollHeight;
+        }
+
+        async function sendMessage() {
+            const text = userInput.value.trim();
+            const apiKey = apiKeyInput.value.trim();
+
+            if ((!text && !base64Image && !isFirstMessage) || !apiKey) {
+                alert("Please enter an API Key and a message or chart image.");
+                return;
+            }
+
+            // Lock UI
+            sendBtn.disabled = true;
+            userInput.value = '';
+            userInput.style.height = 'auto';
+            
+            let displayImgSrc = imagePreview.src;
+            if (base64Image) {
+                imagePreview.style.display = 'none';
+            }
+
+            // Add user message to UI (unless it's the invisible first trigger)
+            if (!isFirstMessage) {
+                addMessage(text, 'user', base64Image ? displayImgSrc : null);
+            } else {
+                addMessage("Initializing strategy parameters...", 'user');
+            }
+
+            // Construct API Payload
+            let userContent = [];
+            
+            // If it's the first message, force the AI to acknowledge the system prompt.
+            if (isFirstMessage) {
+                userContent.push({ "text": "Please acknowledge your instructions and tell me which timeframes to send you." });
+            } else {
+                if (text) userContent.push({ "text": text });
+                if (base64Image) {
+                    userContent.push({
+                        "inline_data": {
+                            "mime_type": mimeType,
+                            "data": base64Image
+                        }
+                    });
+                }
+            }
+
+            chatHistory.push({
+                "role": "user",
+                "parts": userContent
+            });
+
+            const payload = {
+                "system_instruction": {
+                    "parts": [{ "text": systemInstruction }]
+                },
+                "contents": chatHistory,
+                "generationConfig": {
+                    "temperature": 0.2 // Low temperature for more analytical/less creative responses
+                }
+            };
+
+            try {
+                const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    throw new Error(data.error.message);
+                }
+
+                const aiText = data.candidates[0].content.parts[0].text;
+                
+                // Save AI response to history
+                chatHistory.push({
+                    "role": "model",
+                    "parts": [{ "text": aiText }]
+                });
+
+                addMessage(aiText, 'ai');
+
+            } catch (error) {
+                addMessage(`❌ Error: ${error.message}`, 'ai');
+                // Remove the failed user message from history so it doesn't break future context
+                chatHistory.pop(); 
+            } finally {
+                sendBtn.disabled = false;
+                base64Image = null;
+                mimeType = null;
+                imageInput.value = ''; // Reset file input
+                isFirstMessage = false;
+            }
+        }
+
+        sendBtn.addEventListener('click', sendMessage);
+        userInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        });
+
+        // Trigger the initial acknowledgement if the user presses enter with API key
+        apiKeyInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter' && isFirstMessage) {
+                sendMessage();
+            }
+        });
+    </script>
+</body>
+</html>
