@@ -37,11 +37,11 @@
             text-shadow: 0 0 15px rgba(0, 242, 255, 0.4);
         }
 
-        .phase-step {
+        .phase-step, .pattern-card {
             transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
-        .phase-step:hover {
+        .phase-step:hover, .pattern-card:hover {
             transform: translateY(-8px);
             border-color: var(--neon-blue);
         }
@@ -74,7 +74,6 @@
 </head>
 <body class="p-4 md:p-10">
 
-    <!-- Hero Section -->
     <header class="max-w-6xl mx-auto text-center mb-20 gsap-hero">
         <div class="inline-block px-4 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-[10px] font-bold tracking-[0.3em] text-cyan-400 uppercase mb-6">
             Institutional Scalping Framework
@@ -87,10 +86,8 @@
         </p>
     </header>
 
-    <!-- Phase Navigation -->
     <main class="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-24">
         
-        <!-- PHASE 1 -->
         <div class="phase-step glass-card p-8 flex flex-col justify-between">
             <div>
                 <span class="mono text-xs text-cyan-500 mb-4 block">01 / SURVIVAL</span>
@@ -105,7 +102,6 @@
             </ul>
         </div>
 
-        <!-- PHASE 2 -->
         <div class="phase-step glass-card p-8 border-cyan-500/40">
             <span class="mono text-xs text-cyan-500 mb-4 block">02 / ANALYSIS</span>
             <h3 class="text-xl font-bold mb-4">The Two-Chart Filter</h3>
@@ -121,7 +117,6 @@
             </div>
         </div>
 
-        <!-- PHASE 3 -->
         <div class="phase-step glass-card p-8">
             <span class="mono text-xs text-cyan-500 mb-4 block">03 / EXECUTION</span>
             <h3 class="text-xl font-bold mb-4">The Kill Zone</h3>
@@ -134,7 +129,6 @@
             </ul>
         </div>
 
-        <!-- PHASE 4 -->
         <div class="phase-step glass-card p-8">
             <span class="mono text-xs text-cyan-500 mb-4 block">04 / DISCIPLINE</span>
             <h3 class="text-xl font-bold mb-4">The News Ghost</h3>
@@ -147,10 +141,248 @@
         </div>
     </main>
 
-    <!-- AI COACH TERMINAL -->
+    <section class="max-w-6xl mx-auto mb-24">
+        <div class="text-center mb-12 gsap-academy-header">
+            <div class="inline-block px-4 py-1 rounded-full border border-cyan-500/30 bg-cyan-500/5 text-[10px] font-bold tracking-[0.3em] text-cyan-400 uppercase mb-4">
+                Pattern Recognition Engine
+            </div>
+            <h2 class="text-3xl md:text-5xl font-extrabold tracking-tight">TOP 10 CANDLESTICK PATTERNS</h2>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6 mb-8">
+            
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">01 / HAMMER</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="w-[2px] h-16 bg-slate-500 relative">
+                            <div class="absolute top-0 -left-[9px] w-5 h-4 bg-emerald-500 rounded border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Appears after a downtrend</li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Small upper body, long lower wick</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-emerald-400 uppercase tracking-wider">TREND REVERSAL (BUY)</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">02 / INVERTED HAMMER</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="w-[2px] h-16 bg-slate-500 relative">
+                            <div class="absolute bottom-0 -left-[9px] w-5 h-4 bg-emerald-500 rounded border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Appears after a downtrend</li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Long upper wick structure</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-emerald-500/10 border border-emerald-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-emerald-400 uppercase tracking-wider">REVERSAL POSSIBLE (BUY)</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">03 / BULLISH ENGULFING</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="border border-dashed border-emerald-500/30 rounded-lg px-3 py-2 flex items-center gap-4 bg-emerald-500/5">
+                            <div class="w-[2px] h-10 bg-slate-500 relative flex justify-center items-center">
+                                <div class="absolute w-3.5 h-5 bg-rose-500 border border-rose-400 rounded-sm"></div>
+                            </div>
+                            <div class="w-[2px] h-16 bg-slate-400 relative flex justify-center items-center">
+                                <div class="absolute w-4.5 h-11 bg-emerald-500 border border-emerald-400 rounded-sm shadow-[0_0_10px_rgba(16,185,129,0.2)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Red candle fully covered by next green candle</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-emerald-500/20 border border-emerald-400/30 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-emerald-400 uppercase tracking-wider">STRONG BUY SIGNAL</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">04 / BEARISH ENGULFING</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="border border-dashed border-rose-500/30 rounded-lg px-3 py-2 flex items-center gap-4 bg-rose-500/5">
+                            <div class="w-[2px] h-10 bg-slate-400 relative flex justify-center items-center">
+                                <div class="absolute w-3.5 h-5 bg-emerald-500 border border-emerald-400 rounded-sm"></div>
+                            </div>
+                            <div class="w-[2px] h-16 bg-slate-500 relative flex justify-center items-center">
+                                <div class="absolute w-4.5 h-11 bg-rose-500 border border-rose-400 rounded-sm shadow-[0_0_10px_rgba(244,63,94,0.2)]"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Green candle fully covered by next red candle</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-rose-500/10 border border-rose-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-rose-400 uppercase tracking-wider">STRONG SELL SIGNAL</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">05 / DOJI</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="w-[2px] h-16 bg-slate-400 relative flex items-center justify-center">
+                            <div class="absolute w-6 h-[2px] bg-slate-200 shadow-[0_0_8px_rgba(255,255,255,0.6)]"></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Open = Close matrix</li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Price remains completely flat</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-amber-500/10 border border-amber-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-amber-400 uppercase tracking-wider">INDECISION (MARKET CONFUSED)</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">06 / SHOOTING STAR</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="w-[2px] h-16 bg-slate-500 relative">
+                            <div class="absolute bottom-0 -left-[9px] w-5 h-4 bg-rose-500 rounded border border-rose-400 shadow-[0_0_10px_rgba(244,63,94,0.3)]"></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Appears after an uptrend</li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Highly elongated upper wick</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-rose-500/10 border border-rose-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-rose-400 uppercase tracking-wider">SELL SIGNAL / REVERSAL</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">07 / MORNING STAR</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="flex items-end gap-2 h-16 pb-1">
+                            <div class="w-[2px] h-14 bg-slate-500 relative flex justify-center items-center"><div class="absolute top-1 w-3 h-8 bg-rose-500 border border-rose-400 rounded-sm"></div></div>
+                            <div class="w-[2px] h-6 bg-slate-400 relative flex justify-center items-center"><div class="absolute bottom-0 w-3 h-2.5 bg-emerald-500 border border-emerald-400 rounded-sm"></div></div>
+                            <div class="w-[2px] h-14 bg-slate-400 relative flex justify-center items-center"><div class="absolute bottom-1 w-3 h-9 bg-emerald-500 border border-emerald-400 rounded-sm"></div></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> 3-Candle validation pattern</li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Downtrend → small star → strong green</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-emerald-500/20 border border-emerald-400/30 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-emerald-400 uppercase tracking-wider">STRONG BUY</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">08 / EVENING STAR</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="flex items-start gap-2 h-16 pt-1">
+                            <div class="w-[2px] h-14 bg-slate-400 relative flex justify-center items-center"><div class="absolute bottom-1 w-3 h-8 bg-emerald-500 border border-emerald-400 rounded-sm"></div></div>
+                            <div class="w-[2px] h-6 bg-slate-500 relative flex justify-center items-center"><div class="absolute top-0 w-3 h-2.5 bg-rose-500 border border-rose-400 rounded-sm"></div></div>
+                            <div class="w-[2px] h-14 bg-slate-500 relative flex justify-center items-center"><div class="absolute top-1 w-3 h-9 bg-rose-500 border border-rose-400 rounded-sm"></div></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> 3-Candle validation pattern</li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Uptrend → small star → strong red</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-rose-500/10 border border-rose-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-rose-400 uppercase tracking-wider">STRONG SELL</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">09 / HANGING MAN</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="w-[2px] h-16 bg-slate-400 relative">
+                            <div class="absolute top-0 -left-[9px] w-5 h-4 bg-emerald-500 rounded border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Appears after an uptrend</li>
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Resembles hammer but shows core weakness</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-rose-500/10 border border-rose-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-rose-400 uppercase tracking-wider">TREND REVERSAL (SELL)</span>
+                </div>
+            </div>
+
+            <div class="pattern-card glass-card p-5 flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="mono text-xs text-cyan-500 font-bold">10 / HARAMI PATTERN</span>
+                    </div>
+                    <div class="h-28 w-full bg-black/40 border border-white/5 rounded-xl flex items-center justify-center mb-4">
+                        <div class="flex items-center gap-3 bg-purple-500/5 border border-dashed border-purple-500/20 rounded-lg px-3 py-2">
+                            <div class="w-[2px] h-16 bg-slate-500 relative flex justify-center items-center"><div class="absolute w-4.5 h-11 bg-rose-500 border border-rose-400 rounded-sm"></div></div>
+                            <div class="w-[2px] h-10 bg-slate-400 relative flex justify-center items-center"><div class="absolute w-3.5 h-6 bg-emerald-500 border border-emerald-400 rounded-sm"></div></div>
+                        </div>
+                    </div>
+                    <ul class="text-xs space-y-1 text-slate-400 mb-4">
+                        <li class="flex items-start"><span class="text-cyan-400 mr-1.5">•</span> Small candle inside large candle body</li>
+                    </ul>
+                </div>
+                <div class="pt-3 border-t border-white/5 text-center bg-purple-500/10 border border-purple-500/20 rounded-xl py-2">
+                    <span class="text-[10px] mono font-bold text-purple-400 uppercase tracking-wider">TREND CHANGE POSSIBLE</span>
+                </div>
+            </div>
+
+        </div>
+
+        <div class="pattern-card glass-card p-5 border-cyan-500/30 bg-gradient-to-r from-cyan-900/10 to-transparent flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center space-x-4 text-center md:text-left">
+                <div class="w-10 h-10 rounded-xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+                    <i data-lucide="star" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h4 class="text-sm font-bold tracking-wide uppercase text-cyan-400">PRO TIP: STRUCTURAL CONTEXT</h4>
+                    <p class="text-xs text-slate-400 mt-0.5">Always align candlestick formations directly with key Support / Resistance matrix points and Volume confirmation zones.</p>
+                </div>
+            </div>
+            <div class="px-5 py-2.5 bg-black/40 rounded-xl border border-white/5 text-xs text-emerald-400 font-bold uppercase tracking-wider mono flex items-center">
+                <i data-lucide="check-circle" class="w-4 h-4 mr-2"></i> Practice + Patience = Successful Trading
+            </div>
+        </div>
+    </section>
+
     <section class="max-w-4xl mx-auto gsap-chat">
         <div class="glass-card border-white/10 overflow-hidden">
-            <!-- Chat Header -->
             <div class="p-4 border-b border-white/5 bg-white/5 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div class="w-8 h-8 rounded-full bg-cyan-500 flex items-center justify-center shadow-[0_0_15px_rgba(0,242,255,0.4)]">
@@ -170,9 +402,7 @@
                 </div>
             </div>
 
-            <!-- Chat Content -->
             <div id="chat-box" class="chat-container p-6 space-y-6">
-                <!-- Welcome Msg -->
                 <div class="flex items-start space-x-4">
                     <div class="w-8 h-8 rounded-lg bg-white/5 flex items-center justify-center flex-shrink-0 mt-1">
                         <i data-lucide="user-plus" class="w-4 h-4 text-slate-500"></i>
@@ -186,7 +416,6 @@
                 </div>
             </div>
 
-            <!-- Input Area -->
             <div class="p-4 border-t border-white/5 bg-black/20">
                 <div class="relative flex items-center gap-3">
                     <button id="upload-trigger" class="p-3 bg-white/5 hover:bg-white/10 rounded-xl transition border border-white/5 text-slate-400 hover:text-cyan-400">
@@ -202,7 +431,6 @@
                         </button>
                     </div>
                 </div>
-                <!-- Image Preview Container -->
                 <div id="image-preview" class="hidden mt-3 p-2 bg-cyan-500/5 border border-cyan-500/20 rounded-lg inline-flex items-center gap-2">
                     <span id="file-name" class="text-[10px] mono text-cyan-400 italic">chart_screenshot.png</span>
                     <button onclick="clearImage()" class="text-rose-500 hover:text-rose-400"><i data-lucide="x" class="w-3 h-3"></i></button>
@@ -294,15 +522,34 @@
 
         // GSAP Animations
         gsap.from(".gsap-hero", { opacity: 0, y: 30, duration: 1.2, ease: "power4.out" });
+        
         gsap.from(".phase-step", { 
             opacity: 0, 
             y: 40, 
             duration: 0.8, 
-            stagger: 0.2, 
-            delay: 0.5, 
+            stagger: 0.15, 
+            delay: 0.4, 
             ease: "back.out(1.7)" 
         });
-        gsap.from(".gsap-chat", { opacity: 0, scale: 0.95, duration: 1, delay: 1.2, ease: "power2.out" });
+
+        gsap.from(".gsap-academy-header", {
+            opacity: 0,
+            y: 20,
+            duration: 1,
+            delay: 0.8,
+            ease: "power3.out"
+        });
+
+        gsap.from(".pattern-card", {
+            opacity: 0,
+            y: 30,
+            duration: 0.7,
+            stagger: 0.08,
+            delay: 1.0,
+            ease: "power2.out"
+        });
+
+        gsap.from(".gsap-chat", { opacity: 0, scale: 0.95, duration: 1, delay: 1.6, ease: "power2.out" });
 
     </script>
 </body>
