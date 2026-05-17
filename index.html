@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BLUE TRADING | Prop Command Terminal</title>
+    <title>BLUE TRADING | Operator Terminal</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.js"></script>
@@ -62,49 +62,38 @@
                 <span class="font-black tracking-widest text-white uppercase text-base">BLUE <span class="text-blue-500">TRADING</span></span>
             </div>
             <div class="hidden md:flex items-center gap-8 text-[11px] font-bold tracking-widest uppercase text-slate-400">
-                <a href="#tracker" class="hover:text-blue-400 transition-colors">Daily Tracker</a>
-                <a href="#timeframes" class="hover:text-blue-400 transition-colors">Timeframe Confluence</a>
-                <a href="#concepts" class="hover:text-blue-400 transition-colors">Order Flow</a>
+                <a href="#tracker" class="hover:text-blue-400 transition-colors">Daily Ledger</a>
+                <a href="#workflow" class="hover:text-blue-400 transition-colors">FVG & CHoCH</a>
+                <a href="#breakouts" class="hover:text-blue-400 transition-colors">Breakout Mechanics</a>
                 <a href="#patterns" class="hover:text-blue-400 transition-colors">Candlestick Matrix</a>
             </div>
             <div class="flex items-center gap-4">
-                <span class="text-[10px] mono text-blue-400 uppercase font-bold tracking-widest bg-blue-500/10 border border-blue-500/20 px-3 py-1 rounded">Operator Terminal</span>
+                <span class="text-[10px] mono text-emerald-400 uppercase font-bold tracking-widest bg-emerald-500/10 border border-emerald-500/20 px-3 py-1 rounded flex items-center gap-2">
+                    <div class="w-1.5 h-1.5 bg-emerald-400 rounded-full animate-pulse"></div> Live Session
+                </span>
             </div>
         </div>
     </nav>
 
     <div class="pt-28 pb-20 px-4 md:px-8 max-w-7xl mx-auto space-y-24">
 
-        <header class="text-center max-w-4xl mx-auto gsap-stagger">
-            <div class="inline-block px-4 py-1.5 rounded-full border border-blue-500/20 bg-blue-500/5 text-[10px] font-bold tracking-[0.3em] text-blue-400 uppercase mb-6">
-                Private Trading Environment // Proprietary Edge
-            </div>
-            <h1 class="text-4xl md:text-6xl font-extrabold tracking-tighter mb-6 uppercase text-white">
-                THE SOVEREIGN <span class="italic text-blue-500">TRADER.</span>
-            </h1>
-            <p class="text-slate-400 text-sm md:text-base max-w-2xl mx-auto leading-relaxed">
-                Amateurs find a pattern and look for a reason to execute. Professionals find the narrative on the higher timeframes, confirm order delivery, and let the trade come to them.
-            </p>
-        </header>
-
         <section id="tracker" class="gsap-stagger">
             <div class="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="line-chart" class="w-5 h-5 text-blue-500"></i>
+                    <i data-lucide="terminal" class="w-5 h-5 text-blue-500"></i>
                     <div>
-                        <h2 class="text-xl font-bold text-white uppercase tracking-wide">Performance Tracking Module</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Log executions instantly. Maintain strict psychological risk bounds.</p>
+                        <h2 class="text-xl font-bold text-white uppercase tracking-wide">Operator Ledger</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Track executions, maintain discipline, measure probability over time.</p>
                     </div>
                 </div>
-                <div class="text-xs mono text-slate-400">Sample Model / Operational State</div>
             </div>
 
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div class="glass-panel p-6 lg:col-span-1 space-y-4">
-                    <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2">Log Current Session</h3>
+                <div class="glass-panel p-6 lg:col-span-1 space-y-4 border-t-2 border-t-blue-500/50">
+                    <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2">Log Execution</h3>
                     <div>
-                        <label class="block text-[10px] mono uppercase text-slate-400 mb-1">Asset Class / Pair</label>
-                        <input type="text" placeholder="e.g., EURUSD, NAS100" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white">
+                        <label class="block text-[10px] mono uppercase text-slate-400 mb-1">Pair / Asset</label>
+                        <input type="text" placeholder="e.g., XAUUSD, NAS100" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white">
                     </div>
                     <div class="grid grid-cols-2 gap-4">
                         <div>
@@ -125,49 +114,49 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] mono uppercase text-slate-400 mb-1">R-Multiple Gained/Lost</label>
-                        <input type="number" step="0.1" placeholder="e.g., +3.5 or -1.0" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white">
+                        <label class="block text-[10px] mono uppercase text-slate-400 mb-1">R-Multiple</label>
+                        <input type="number" step="0.1" placeholder="e.g., +2.5 or -1.0" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white">
                     </div>
                     <div>
-                        <label class="block text-[10px] mono uppercase text-slate-400 mb-1">Session Strategy Notes</label>
-                        <textarea rows="2" placeholder="Was HTF bias aligned? Was it a clean sweep entry?" class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white resize-none"></textarea>
+                        <label class="block text-[10px] mono uppercase text-slate-400 mb-1">Execution Notes (FVG/CHoCH)</label>
+                        <textarea rows="2" placeholder="H1 FVG tap -> M5 CHoCH entry." class="w-full bg-slate-950 border border-white/10 rounded-lg px-3 py-2 text-xs focus:outline-none focus:border-blue-500 text-white resize-none"></textarea>
                     </div>
-                    <button class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold text-xs uppercase py-2.5 rounded-lg tracking-wider transition-colors">Commit to Database</button>
+                    <button class="w-full bg-blue-600 hover:bg-blue-500 text-white font-bold text-xs uppercase py-2.5 rounded-lg tracking-wider transition-colors">Log Entry</button>
                 </div>
 
                 <div class="glass-panel p-6 lg:col-span-2 flex flex-col justify-between">
                     <div>
-                        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mb-4">Historical Session Ledger</h3>
+                        <h3 class="text-sm font-bold text-white uppercase tracking-wider border-b border-white/5 pb-2 mb-4">Trade Database</h3>
                         <div class="overflow-x-auto">
                             <table class="w-full text-left text-xs">
                                 <thead>
                                     <tr class="border-b border-white/5 text-slate-500 mono uppercase text-[10px]">
-                                        <th class="pb-2">Date / Time</th>
+                                        <th class="pb-2">Date</th>
                                         <th class="pb-2">Asset</th>
-                                        <th class="pb-2">Setup / Narrative</th>
+                                        <th class="pb-2">Structural Logic</th>
                                         <th class="pb-2">R-Value</th>
                                         <th class="pb-2 text-right">Net Return</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-white/5 font-medium text-slate-300">
                                     <tr>
-                                        <td class="py-3 mono text-slate-500">14/05/26</td>
+                                        <td class="py-3 mono text-slate-500">Today</td>
                                         <td class="py-3 text-white">NAS100</td>
-                                        <td class="py-3">NY Session Open / H1 FVG Fill + M1 Swept Floor</td>
-                                        <td class="py-3 text-emerald-400 mono font-bold">+4.2R</td>
-                                        <td class="py-3 text-emerald-400 text-right font-bold">+$4,200</td>
+                                        <td class="py-3">H1 Bullish FVG -> M1 CHoCH Confirmation</td>
+                                        <td class="py-3 text-emerald-400 mono font-bold">+3.5R</td>
+                                        <td class="py-3 text-emerald-400 text-right font-bold">+$3,500</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-3 mono text-slate-500">13/05/26</td>
+                                        <td class="py-3 mono text-slate-500">Yesterday</td>
                                         <td class="py-3 text-white">EURUSD</td>
-                                        <td class="py-3">London Killzone / Previous Day High Liquidity Sweep</td>
+                                        <td class="py-3">London Sweep -> M5 CHoCH Short</td>
                                         <td class="py-3 text-emerald-400 mono font-bold">+2.0R</td>
                                         <td class="py-3 text-emerald-400 text-right font-bold">+$2,000</td>
                                     </tr>
                                     <tr>
-                                        <td class="py-3 mono text-slate-500">12/05/26</td>
+                                        <td class="py-3 mono text-slate-500">Tuesday</td>
                                         <td class="py-3 text-white">XAUUSD</td>
-                                        <td class="py-3">CPI News Spike / Attempted Reversal against HTF Bias</td>
+                                        <td class="py-3">Failed FVG Hold. Stopped at invalidation.</td>
                                         <td class="py-3 text-rose-500 mono font-bold">-1.0R</td>
                                         <td class="py-3 text-rose-500 text-right font-bold">-$1,000</td>
                                     </tr>
@@ -177,15 +166,15 @@
                     </div>
                     <div class="grid grid-cols-3 gap-4 border-t border-white/5 pt-4 mt-4 text-center">
                         <div>
-                            <span class="block text-[10px] text-slate-500 uppercase font-bold mono">Win Rate (May)</span>
-                            <span class="text-xl font-bold text-white tracking-tight">66.7%</span>
+                            <span class="block text-[10px] text-slate-500 uppercase font-bold mono">Win Rate</span>
+                            <span class="text-xl font-bold text-white tracking-tight">72.4%</span>
                         </div>
                         <div>
                             <span class="block text-[10px] text-slate-500 uppercase font-bold mono">Profit Factor</span>
-                            <span class="text-xl font-bold text-blue-400 tracking-tight">6.2R</span>
+                            <span class="text-xl font-bold text-blue-400 tracking-tight">4.5R</span>
                         </div>
                         <div>
-                            <span class="block text-[10px] text-slate-500 uppercase font-bold mono">Max Drawdown</span>
+                            <span class="block text-[10px] text-slate-500 uppercase font-bold mono">Account DD</span>
                             <span class="text-xl font-bold text-emerald-400 tracking-tight">-1.0%</span>
                         </div>
                     </div>
@@ -193,170 +182,198 @@
             </div>
         </section>
 
-        <section id="timeframes" class="gsap-stagger">
+        <section id="workflow" class="gsap-stagger">
             <div class="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <i data-lucide="hourglass" class="w-5 h-5 text-blue-500"></i>
+                <i data-lucide="layers" class="w-5 h-5 text-indigo-400"></i>
                 <div>
-                    <h2 class="text-xl font-bold text-white uppercase tracking-wide">The Multi-Timeframe Matrix</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">20-Year Rule: Never judge market directional order flow by looking at one window.</p>
+                    <h2 class="text-xl font-bold text-white uppercase tracking-wide">The Precision Workflow: 1H FVG to LTF CHoCH</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">Stop placing limit orders blindly. Confirm the algorithmic shift on the lower timeframe.</p>
                 </div>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-panel p-6 border-l-4 border-l-blue-500 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="mono text-[10px] font-bold text-blue-400 uppercase tracking-widest">Phase 1 // Macro Structure</span>
-                            <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[9px] font-bold uppercase mono">D1 / H4</span>
-                        </div>
-                        <h3 class="text-base font-bold text-white mb-2">High Timeframe (HTF) Narrative</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
-                            This defines the overarching tide. We map major Market Structure Shifts (MSS), daily order blocks, and key liquidity horizons. If the daily timeframe is expanding aggressively green, you are explicitly prohibited from hunting intraday shorts.
-                        </p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="glass-panel p-6 border-l-4 border-l-blue-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="mono text-[10px] font-bold text-blue-400 uppercase tracking-widest">Step 01 // Identify Context</span>
+                        <span class="px-2 py-0.5 bg-blue-500/10 text-blue-400 rounded text-[9px] font-bold uppercase mono">1H Chart</span>
                     </div>
-                    <div class="p-3 bg-slate-950 border border-white/5 rounded-lg text-[11px] mono text-slate-400 italic">
-                        "The HTF acts as the structural blueprint. It provides context."
+                    <h3 class="text-lg font-bold text-white mb-2">The Fair Value Gap (FVG)</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-6">
+                        An FVG represents a severe algorithmic imbalance. Price moved so fast that buyers/sellers were left behind. You do <b>not</b> trade simply because you see an FVG. You mark the 1-Hour FVG as a <i>Point of Interest (POI)</i>. When price returns to this zone, it is seeking liquidity to rebalance.
+                    </p>
+                    <div class="h-32 w-full bg-slate-950 rounded-lg border border-white/5 flex items-center justify-center relative">
+                        <div class="flex gap-6 items-center">
+                            <div class="relative w-4 h-16 flex items-center justify-center -mt-8">
+                                <div class="absolute w-[2px] h-16 bg-slate-500"></div>
+                                <div class="absolute top-2 w-4 h-8 bg-rose-500 rounded-sm"></div>
+                                <div class="absolute bottom-0 w-8 border-b border-dashed border-blue-400"></div>
+                            </div>
+                            <div class="relative w-4 h-24 flex items-center justify-center">
+                                <div class="absolute w-[2px] h-24 bg-slate-500"></div>
+                                <div class="absolute w-4 h-20 bg-rose-500 rounded-sm"></div>
+                                <div class="absolute top-2 w-20 h-14 bg-blue-500/20 border-y border-blue-400/50 flex flex-col items-center justify-center shadow-[0_0_15px_rgba(59,130,246,0.2)]">
+                                    <span class="text-[8px] mono text-blue-300 font-bold uppercase tracking-widest">1H FVG (POI)</span>
+                                </div>
+                            </div>
+                            <div class="relative w-4 h-16 flex items-center justify-center mt-12">
+                                <div class="absolute w-[2px] h-16 bg-slate-500"></div>
+                                <div class="absolute bottom-2 w-4 h-8 bg-rose-500 rounded-sm"></div>
+                                <div class="absolute top-0 w-8 border-t border-dashed border-blue-400"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
-                <div class="glass-panel p-6 border-l-4 border-l-indigo-500 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="mono text-[10px] font-bold text-indigo-400 uppercase tracking-widest">Phase 2 // Zone Definition</span>
-                            <span class="px-2 py-0.5 bg-indigo-500/10 text-indigo-400 rounded text-[9px] font-bold uppercase mono">H1 / M15</span>
+                <div class="glass-panel p-6 border-l-4 border-l-emerald-500">
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="mono text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Step 02 // Confirm Shift</span>
+                        <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[9px] font-bold uppercase mono">5M / 1M Chart</span>
+                    </div>
+                    <h3 class="text-lg font-bold text-white mb-2">Change of Character (CHoCH)</h3>
+                    <p class="text-xs text-slate-400 leading-relaxed mb-6">
+                        Zoom into the 5M chart when price hits your 1H FVG. Price will naturally be in a downtrend. A <b>CHoCH</b> occurs when price suddenly breaks above the last lower high. This confirms that institutions are actively defending the 1H FVG and order flow has shifted bullish. Execute on the pullback.
+                    </p>
+                    <div class="h-32 w-full bg-slate-950 rounded-lg border border-white/5 flex items-center justify-center relative overflow-hidden">
+                        <div class="absolute bottom-0 w-full h-12 bg-blue-500/10 border-t border-dashed border-blue-500/30">
+                            <span class="absolute top-1 left-2 text-[7px] mono text-blue-400">1H FVG ZONE</span>
                         </div>
-                        <h3 class="text-base font-bold text-white mb-2">Medium Timeframe (MTF) Intersect</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
-                            This isolates your operating theater. Once we know the overall daily intent, we wait for the price on the H1 or M15 timeframe to pull deep into key validation zones—like an internal Fair Value Gap or old session high/low pools.
-                        </p>
-                    </div>
-                    <div class="p-3 bg-slate-950 border border-white/5 rounded-lg text-[11px] mono text-slate-400 italic">
-                        "The MTF filters noise, mapping local liquidity points."
-                    </div>
-                </div>
-
-                <div class="glass-panel p-6 border-l-4 border-l-emerald-500 flex flex-col justify-between">
-                    <div>
-                        <div class="flex items-center justify-between mb-3">
-                            <span class="mono text-[10px] font-bold text-emerald-400 uppercase tracking-widest">Phase 3 // Precision Strike</span>
-                            <span class="px-2 py-0.5 bg-emerald-500/10 text-emerald-400 rounded text-[9px] font-bold uppercase mono">M5 / M1</span>
-                        </div>
-                        <h3 class="text-base font-bold text-white mb-2">Lower Timeframe (LTF) Execution</h3>
-                        <p class="text-xs text-slate-400 leading-relaxed mb-4">
-                            This is your sniper scope. We do not place orders blindly when the price lands in an MTF zone. We drop to the M5 or M1 window during key session hours and wait exclusively for a clear structural failure (e.g., a sweep or candle body closing break).
-                        </p>
-                    </div>
-                    <div class="p-3 bg-slate-950 border border-white/5 rounded-lg text-[11px] mono text-slate-400 italic">
-                        "The LTF minimizes risk exposure, tightening the stop-loss."
+                        
+                        <svg class="absolute inset-0 w-full h-full" preserveAspectRatio="none">
+                            <path d="M 20 20 L 60 70 L 90 40 L 130 90 L 170 50 L 210 100 L 250 20" fill="none" stroke="#94a3b8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            <line x1="160" y1="50" x2="260" y2="50" stroke="#f43f5e" stroke-width="1" stroke-dasharray="4"/>
+                            <text x="215" y="45" fill="#f43f5e" font-size="9" font-family="monospace" font-weight="bold">CHoCH</text>
+                            
+                            <circle cx="170" cy="50" r="3" fill="#f43f5e"/> <circle cx="210" cy="100" r="4" fill="#3b82f6"/> <circle cx="250" cy="20" r="4" fill="#10b981"/> </svg>
                     </div>
                 </div>
             </div>
         </section>
 
-        <section id="concepts" class="gsap-stagger">
+        <section id="breakouts" class="gsap-stagger">
             <div class="flex items-center gap-3 mb-6 border-b border-white/5 pb-4">
-                <i data-lucide="workflow" class="w-5 h-5 text-blue-500"></i>
+                <i data-lucide="crosshair" class="w-5 h-5 text-rose-400"></i>
                 <div>
-                    <h2 class="text-xl font-bold text-white uppercase tracking-wide">Advanced Liquidity Delivery</h2>
-                    <p class="text-xs text-slate-500 mt-0.5">Understanding institutional mechanics at a glance.</p>
+                    <h2 class="text-xl font-bold text-white uppercase tracking-wide">Advanced Breakout Mechanics</h2>
+                    <p class="text-xs text-slate-500 mt-0.5">How to distinguish between an engineered trap and genuine structural delivery.</p>
                 </div>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="glass-panel p-6 border-t-2 border-t-blue-500/50">
-                    <h3 class="text-base font-bold text-white mb-2 flex justify-between items-center">
-                        Liquidity Sweeps <span class="text-[10px] font-bold text-blue-400 mono">Engineered Trap</span>
-                    </h3>
-                    <div class="h-40 w-full bg-slate-950 rounded-lg border border-white/5 my-4 relative flex items-center justify-center">
-                        <div class="absolute top-12 w-full border-t-2 border-dashed border-blue-500/40">
-                            <span class="absolute -top-4 right-2 text-[8px] mono text-blue-400">LIQUIDITY CEILING</span>
-                        </div>
-                        <div class="flex gap-4 items-end h-28 relative pt-4">
-                            <div class="relative w-4 h-12 flex items-center justify-center">
-                                <div class="absolute w-[2px] h-10 bg-slate-600"></div>
-                                <div class="absolute bottom-2 w-4 h-6 bg-emerald-500 rounded-sm"></div>
+                
+                <div class="glass-panel p-6 border-t-2 border-t-rose-500/50 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-1 uppercase tracking-wide">1. The Fakeout (Sweep Trap)</h3>
+                        <p class="text-[10px] text-slate-400 mb-4 h-8">Price breaks a key high, triggering retail breakout buyers, only to instantly reverse and trap them.</p>
+                        
+                        <div class="h-36 w-full bg-slate-950 rounded border border-white/5 relative flex items-center justify-center">
+                            <div class="absolute top-10 w-full border-t border-dashed border-rose-500/50">
+                                <span class="absolute -top-4 right-2 text-[8px] mono text-rose-400">BSL (Buy Side Liquidity)</span>
                             </div>
-                            <div class="relative w-4 h-24 flex items-center justify-center">
-                                <div class="absolute w-[2px] h-24 bg-slate-400"></div>
-                                <div class="absolute top-0 w-4 h-6 bg-rose-500 rounded-sm"></div>
-                                <div class="absolute -top-2 w-8 h-8 rounded-full border border-blue-500/40 bg-blue-500/10 flex items-center justify-center text-[7px] font-bold mono text-blue-400 animate-pulse">SWEEP</div>
-                            </div>
-                            <div class="relative w-4 h-16 flex items-center justify-center">
-                                <div class="absolute w-[2px] h-16 bg-slate-600"></div>
-                                <div class="absolute bottom-2 w-4 h-10 bg-rose-500 rounded-sm"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">
-                        Institutions require massive order volume. They drive prices past psychological highs/lows to trigger automated retail stop losses, collecting that depth of market liquidity before completely reversing course.
-                    </p>
-                </div>
-
-                <div class="glass-panel p-6 border-t-2 border-t-indigo-500/50">
-                    <h3 class="text-base font-bold text-white mb-2 flex justify-between items-center">
-                        Fair Value Gaps <span class="text-[10px] font-bold text-indigo-400 mono">Imbalance Marker</span>
-                    </h3>
-                    <div class="h-40 w-full bg-slate-950 rounded-lg border border-white/5 my-4 relative flex items-center justify-center">
-                        <div class="flex gap-4 items-center h-28 relative pt-2">
-                            <div class="relative w-3 h-12 flex items-center justify-center -mt-8">
-                                <div class="absolute w-[2px] h-12 bg-slate-600"></div>
-                                <div class="absolute top-0 w-3 h-8 bg-rose-500 rounded-sm"></div>
-                                <div class="absolute bottom-0 w-6 border-b border-dashed border-indigo-400"></div>
-                            </div>
-                            <div class="relative w-3 h-20 flex items-center justify-center">
-                                <div class="absolute w-[2px] h-20 bg-slate-600"></div>
-                                <div class="absolute w-3 h-18 bg-rose-500 rounded-sm"></div>
-                                <div class="absolute top-2 w-14 h-10 bg-indigo-500/20 border-l border-r border-indigo-400/50 z-0 flex items-center justify-center">
-                                    <span class="text-[7px] mono text-indigo-400 font-bold uppercase rotate-90 tracking-widest">IMBALANCE</span>
+                            
+                            <div class="flex gap-4 items-end h-24 relative pt-4">
+                                <div class="relative w-3 h-10 flex items-center justify-center">
+                                    <div class="absolute w-[2px] h-10 bg-slate-500"></div>
+                                    <div class="absolute bottom-2 w-3 h-6 bg-emerald-500 rounded-sm"></div>
+                                </div>
+                                <div class="relative w-3 h-20 flex flex-col items-center justify-end">
+                                    <div class="absolute w-[2px] h-20 bg-slate-300"></div>
+                                    <div class="absolute top-0 w-8 h-8 rounded-full border border-rose-500/50 bg-rose-500/20 flex items-center justify-center">
+                                        <span class="text-[7px] mono text-rose-300 font-bold">TRAP</span>
+                                    </div>
+                                    <div class="absolute bottom-2 w-3 h-6 bg-rose-500 rounded-sm"></div>
+                                </div>
+                                <div class="relative w-3 h-14 flex items-center justify-center mt-6">
+                                    <div class="absolute w-[2px] h-14 bg-slate-500"></div>
+                                    <div class="absolute top-0 w-3 h-10 bg-rose-500 rounded-sm"></div>
                                 </div>
                             </div>
-                            <div class="relative w-3 h-12 flex items-center justify-center mt-12">
-                                <div class="absolute w-[2px] h-12 bg-slate-600"></div>
-                                <div class="absolute bottom-0 w-3 h-8 bg-rose-500 rounded-sm"></div>
-                                <div class="absolute top-0 w-6 border-t border-dashed border-indigo-400"></div>
-                            </div>
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">
-                        A critical algorithmic anomaly within a three-candle progression. Rapid market re-pricing creates an immediate structural gap between wick limits. The algorithm retains an efficiency mandate to re-deliver pricing to this specific zone.
-                    </p>
+                    <div class="mt-4 p-2 bg-rose-500/10 border border-rose-500/20 rounded text-[9px] text-rose-400 mono leading-relaxed">
+                        <b>Action:</b> Look for a Shooting Star or Bearish Engulfing immediately after the high is taken. Short the rejection.
+                    </div>
                 </div>
 
-                <div class="glass-panel p-6 border-t-2 border-t-emerald-500/50">
-                    <h3 class="text-base font-bold text-white mb-2 flex justify-between items-center">
-                        Order Blocks <span class="text-[10px] font-bold text-emerald-400 mono">Capital Injection</span>
-                    </h3>
-                    <div class="h-40 w-full bg-slate-950 rounded-lg border border-white/5 my-4 relative flex items-center justify-center">
-                        <div class="flex gap-4 items-end h-28 relative pt-4">
-                            <div class="relative w-3 h-10 flex items-center justify-center mb-1">
-                                <div class="absolute w-[2px] h-10 bg-slate-600"></div>
-                                <div class="absolute bottom-0 w-3 h-6 bg-rose-500 rounded-sm relative z-10"></div>
-                                <div class="absolute -bottom-1 -left-2 w-7 h-10 border border-emerald-400/40 rounded bg-emerald-500/10 z-0"></div>
+                <div class="glass-panel p-6 border-t-2 border-t-emerald-500/50 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-1 uppercase tracking-wide">2. The CHoCH Breakout</h3>
+                        <p class="text-[10px] text-slate-400 mb-4 h-8">Price taps a HTF FVG, compresses, and violently breaks structural highs, confirming intent.</p>
+                        
+                        <div class="h-36 w-full bg-slate-950 rounded border border-white/5 relative flex items-center justify-center">
+                            <div class="absolute bottom-4 w-full h-10 bg-emerald-500/10 border-t border-dashed border-emerald-500/30"></div>
+                            <div class="absolute top-10 w-full border-t border-dashed border-slate-500/50">
+                                <span class="absolute -top-4 left-2 text-[8px] mono text-slate-400">Old Lower High</span>
                             </div>
-                            <div class="relative w-3 h-24 flex items-center justify-center">
-                                <div class="absolute w-[2px] h-24 bg-slate-600"></div>
-                                <div class="absolute bottom-2 w-3 h-20 bg-emerald-500 rounded-sm"></div>
-                            </div>
-                            <div class="relative w-3 h-16 flex items-center justify-center mb-16">
-                                <div class="absolute w-[2px] h-16 bg-slate-600"></div>
-                                <div class="absolute bottom-0 w-3 h-12 bg-emerald-500 rounded-sm"></div>
+
+                            <div class="flex gap-3 items-end h-24 relative z-10 pb-4">
+                                <div class="relative w-3 h-12 flex items-center justify-center">
+                                    <div class="absolute w-[2px] h-12 bg-slate-600"></div>
+                                    <div class="absolute top-0 w-3 h-8 bg-rose-500 rounded-sm"></div>
+                                </div>
+                                <div class="relative w-3 h-8 flex items-center justify-center">
+                                    <div class="absolute w-[2px] h-8 bg-slate-500"></div>
+                                    <div class="absolute bottom-0 w-3 h-4 bg-emerald-500 rounded-sm"></div>
+                                </div>
+                                <div class="relative w-3 h-20 flex items-center justify-center">
+                                    <div class="absolute w-[2px] h-20 bg-slate-400"></div>
+                                    <div class="absolute bottom-2 w-3 h-16 bg-emerald-500 rounded-sm shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
+                                    <span class="absolute -top-5 text-[8px] mono text-emerald-400 font-bold bg-slate-900 px-1">CHoCH</span>
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <p class="text-[11px] text-slate-400 leading-relaxed">
-                        The definitive historical candle footprint containing concentrated institutional order density. When market delivery retraces to the initiation threshold of this specific candle structure, algorithmic execution layers deploy protection liquidity.
-                    </p>
+                    <div class="mt-4 p-2 bg-emerald-500/10 border border-emerald-500/20 rounded text-[9px] text-emerald-400 mono leading-relaxed">
+                        <b>Action:</b> This is your green light. The breakout is real because it is backed by HTF liquidity from the FVG.
+                    </div>
                 </div>
+
+                <div class="glass-panel p-6 border-t-2 border-t-blue-500/50 flex flex-col justify-between">
+                    <div>
+                        <h3 class="text-sm font-bold text-white mb-1 uppercase tracking-wide">3. The Mitigation Retest</h3>
+                        <p class="text-[10px] text-slate-400 mb-4 h-8">A clean structural break leaves an order block behind. Price returns later to mitigate (retest) and goes.</p>
+                        
+                        <div class="h-36 w-full bg-slate-950 rounded border border-white/5 relative flex items-center justify-center">
+                            <div class="absolute top-14 w-full border-t border-dashed border-blue-400/50">
+                                <span class="absolute -top-4 right-2 text-[8px] mono text-blue-400">BOS (Break of Structure)</span>
+                            </div>
+                            
+                            <div class="flex gap-3 items-end h-28 relative pt-4">
+                                <div class="relative w-3 h-10 flex items-center justify-center mb-4">
+                                    <div class="absolute w-[2px] h-10 bg-slate-500"></div>
+                                    <div class="absolute bottom-0 w-3 h-6 bg-rose-500 rounded-sm"></div>
+                                    <div class="absolute -bottom-1 -left-2 w-7 h-12 border border-blue-500/50 bg-blue-500/10 rounded"></div>
+                                </div>
+                                <div class="relative w-3 h-20 flex items-center justify-center">
+                                    <div class="absolute w-[2px] h-20 bg-slate-500"></div>
+                                    <div class="absolute bottom-2 w-3 h-16 bg-emerald-500 rounded-sm"></div>
+                                </div>
+                                <div class="relative w-3 h-14 flex items-center justify-center mb-6">
+                                    <div class="absolute w-[2px] h-14 bg-slate-400"></div>
+                                    <div class="absolute bottom-0 w-3 h-8 bg-rose-500 rounded-sm"></div>
+                                    <div class="absolute -bottom-4 text-[7px] mono text-blue-400 font-bold bg-slate-900 px-1 z-10">RETEST</div>
+                                </div>
+                                <div class="relative w-3 h-16 flex items-center justify-center mb-10">
+                                    <div class="absolute w-[2px] h-16 bg-slate-500"></div>
+                                    <div class="absolute bottom-2 w-3 h-12 bg-emerald-500 rounded-sm"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-2 bg-blue-500/10 border border-blue-500/20 rounded text-[9px] text-blue-400 mono leading-relaxed">
+                        <b>Action:</b> Wait for the retest into the blue order block. Execute on a LTF Hammer or Bullish Engulfing.
+                    </div>
+                </div>
+
             </div>
         </section>
 
         <section id="patterns" class="gsap-stagger">
             <div class="flex items-center justify-between mb-6 border-b border-white/5 pb-4">
                 <div class="flex items-center gap-3">
-                    <i data-lucide="candlestick-chart" class="w-5 h-5 text-blue-500"></i>
+                    <i data-lucide="bar-chart-2" class="w-5 h-5 text-indigo-400"></i>
                     <div>
-                        <h2 class="text-xl font-bold text-white uppercase tracking-wide">Macro Candlestick Execution Matrix</h2>
-                        <p class="text-xs text-slate-500 mt-0.5">Structural candle configurations evaluated solely at clear Key Liquidity Pools.</p>
+                        <h2 class="text-xl font-bold text-white uppercase tracking-wide">LTF Candlestick Execution Matrix</h2>
+                        <p class="text-xs text-slate-500 mt-0.5">Use these patterns strictly as triggers <b>inside</b> your FVG or Order Block zones.</p>
                     </div>
                 </div>
             </div>
@@ -365,39 +382,37 @@
                 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">01 / The Hammer</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">01 / FVG Rejection (Hammer)</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
-                            <div class="absolute bottom-6 w-full border-b border-dashed border-emerald-500/30"></div>
-                            <div class="relative w-12 h-16 flex items-center justify-center mt-2">
+                            <div class="absolute bottom-4 w-full h-8 bg-emerald-500/10 border-t border-dashed border-emerald-500/30"></div>
+                            <div class="relative w-12 h-16 flex items-center justify-center z-10 mt-2">
                                 <div class="absolute w-[2px] h-14 bg-slate-400"></div>
                                 <div class="absolute top-0 w-4 h-4 bg-emerald-500 rounded-sm shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
                             </div>
-                            <span class="text-[8px] mono text-emerald-400 mt-1 uppercase font-bold">Floor Sweep Rejection</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Heavy sell stops triggered at support. Aggressive intraday institutional buy back forces the session to close near its high.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Price dips deep into an FVG, hits a wall of institutional buy orders, and rejects instantly.</p>
                     </div>
-                    <div class="text-center bg-emerald-500/10 border border-emerald-500/20 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Bullish Structural Reversal</div>
+                    <div class="text-center bg-emerald-500/10 border border-emerald-500/20 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Long Trigger</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">02 / Inverted Hammer</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">02 / Liquidity Test (Inv Hammer)</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="absolute top-6 w-full border-b border-dashed border-blue-500/30"></div>
                             <div class="relative w-12 h-16 flex items-center justify-center mb-2">
                                 <div class="absolute w-[2px] h-14 bg-slate-400"></div>
                                 <div class="absolute bottom-0 w-4 h-4 bg-emerald-500 rounded-sm"></div>
                             </div>
-                            <span class="text-[8px] mono text-blue-400 uppercase font-bold">Top Liquidity Test</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Institutional capital tests higher inventory depth at an accumulation floor. Sellers exhaust, priming an explosive expansion upwards.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Testing supply before a breakout. If it occurs above an FVG, buyers are absorbing sellers.</p>
                     </div>
-                    <div class="text-center bg-blue-500/10 border border-blue-500/20 rounded py-1.5 text-[9px] mono font-bold text-blue-400 uppercase">Bullish Structural Intent</div>
+                    <div class="text-center bg-emerald-500/10 border border-emerald-500/20 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Momentum Building</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">03 / Bull Engulfing</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">03 / CHoCH Catalyst (Bull Eng)</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="flex items-center justify-center gap-3 w-full h-16 mt-2">
                                 <div class="relative w-4 h-12 flex items-center justify-center">
@@ -406,19 +421,18 @@
                                 </div>
                                 <div class="relative w-4 h-16 flex items-center justify-center">
                                     <div class="absolute w-[2px] h-14 bg-slate-400"></div>
-                                    <div class="absolute w-4.5 h-10 bg-emerald-500 rounded-sm shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
+                                    <div class="absolute w-4 h-10 bg-emerald-500 rounded-sm shadow-[0_0_10px_rgba(16,185,129,0.3)]"></div>
                                 </div>
                             </div>
-                            <span class="text-[8px] mono text-emerald-400 mt-2 uppercase font-bold">Supply Swallowed Clean</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Seller supply is completely neutralized by a secondary institutional buy block, sweeping previous low horizons clean.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">The ultimate LTF confirmation. A massive block of demand swallows the last leg of supply.</p>
                     </div>
-                    <div class="text-center bg-emerald-500/20 border border-emerald-400/30 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Dominant Long Trigger</div>
+                    <div class="text-center bg-emerald-500/20 border border-emerald-400/30 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Strong Long Entry</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">04 / Bear Engulfing</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">04 / Supply Shift (Bear Eng)</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="flex items-center justify-center gap-3 w-full h-16 mt-2">
                                 <div class="relative w-4 h-12 flex items-center justify-center">
@@ -427,35 +441,33 @@
                                 </div>
                                 <div class="relative w-4 h-16 flex items-center justify-center">
                                     <div class="absolute w-[2px] h-14 bg-slate-400"></div>
-                                    <div class="absolute w-4.5 h-10 bg-rose-500 rounded-sm shadow-[0_0_10px_rgba(244,63,94,0.3)]"></div>
+                                    <div class="absolute w-4 h-10 bg-rose-500 rounded-sm shadow-[0_0_10px_rgba(244,63,94,0.3)]"></div>
                                 </div>
                             </div>
-                            <span class="text-[8px] mono text-rose-400 mt-2 uppercase font-bold">Demand Layer Breached</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Institutional algorithms aggressively override the previous buy session, shifting local internal order delivery to discount.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Occurs at premium HTF resistance. Instantly invalidates local buyers and confirms a downside CHoCH.</p>
                     </div>
-                    <div class="text-center bg-rose-500/10 border border-rose-500/20 rounded py-1.5 text-[9px] mono font-bold text-rose-400 uppercase">Dominant Short Trigger</div>
+                    <div class="text-center bg-rose-500/10 border border-rose-500/20 rounded py-1.5 text-[9px] mono font-bold text-rose-400 uppercase">Strong Short Entry</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">05 / Shooting Star</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">05 / BSL Sweep (Shooting Star)</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="absolute top-6 w-full border-b border-dashed border-rose-500/30"></div>
-                            <div class="relative w-12 h-16 flex items-center justify-center mb-2">
+                            <div class="relative w-12 h-16 flex items-center justify-center mb-2 z-10">
                                 <div class="absolute w-[2px] h-14 bg-slate-400"></div>
                                 <div class="absolute bottom-0 w-4 h-4 bg-rose-500 rounded-sm shadow-[0_0_10px_rgba(244,63,94,0.3)]"></div>
                             </div>
-                            <span class="text-[8px] mono text-rose-400 uppercase font-bold">Ceiling Sweep Rejection</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">An absolute breakout trap. Retail buyers are baited as price probes historical highs, before institutional distribution slams it low.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">The visual footprint of a Liquidity Sweep trap. Price grabs buy-stops above a high, then dumps.</p>
                     </div>
-                    <div class="text-center bg-rose-500/10 border border-rose-500/20 rounded py-1.5 text-[9px] mono font-bold text-rose-400 uppercase">Bearish Premium Reversal</div>
+                    <div class="text-center bg-rose-500/10 border border-rose-500/20 rounded py-1.5 text-[9px] mono font-bold text-rose-400 uppercase">Short Trigger</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">06 / Morning Star</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">06 / Order Block Accumulation</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="flex items-center justify-center gap-2 w-full h-16 mt-2">
                                 <div class="relative w-3 h-10 flex items-center justify-center">
@@ -471,16 +483,15 @@
                                     <div class="absolute w-3 h-8 bg-emerald-500 rounded-sm"></div>
                                 </div>
                             </div>
-                            <span class="text-[8px] mono text-emerald-400 mt-2 uppercase font-bold">Three-Part Deceleration</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">A structural sandwich. Selling momentum hits a macro liquidity floor, creating compression, followed immediately by strong structural expansion.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">A 3-candle sequence forming inside a discount Order Block. Shows clear deceleration before a bullish expansion.</p>
                     </div>
-                    <div class="text-center bg-emerald-500/20 border border-emerald-400/30 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Structural Accumulation</div>
+                    <div class="text-center bg-emerald-500/20 border border-emerald-400/30 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Accumulation Entry</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">07 / Evening Star</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">07 / Premium Distribution</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="flex items-center justify-center gap-2 w-full h-16 mt-2">
                                 <div class="relative w-3 h-10 flex items-center justify-center">
@@ -496,45 +507,42 @@
                                     <div class="absolute w-3 h-8 bg-rose-500 rounded-sm"></div>
                                 </div>
                             </div>
-                            <span class="text-[8px] mono text-rose-400 mt-2 uppercase font-bold">Premium Deceleration Matrix</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">The exact converse. Bullish structural inventory exhaustively enters a key macro supply premium zone, breaking downward rapidly.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Forms at premium supply zones. Buyers exhaust, followed instantly by aggressive institutional selling.</p>
                     </div>
-                    <div class="text-center bg-rose-500/10 border border-rose-500/20 rounded py-1.5 text-[9px] mono font-bold text-rose-400 uppercase">Structural Distribution</div>
+                    <div class="text-center bg-rose-500/10 border border-rose-500/20 rounded py-1.5 text-[9px] mono font-bold text-rose-400 uppercase">Distribution Short</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">08 / The Doji</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">08 / Zone Equilibrium (Doji)</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="relative w-12 h-16 flex items-center justify-center">
                                 <div class="absolute w-[2px] h-14 bg-slate-500"></div>
                                 <div class="absolute w-5 h-[2px] bg-white shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
                             </div>
-                            <span class="text-[8px] mono text-slate-400 mt-2 uppercase font-bold">Order Volatility Balance</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Perfect systemic equilibrium. Bids and offers match evenly, creating an intentional compression phase before an explosive expansion break.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Often forms exactly on the line of a Break of Structure (BOS) retest, indicating a brief pause before continuation.</p>
                     </div>
-                    <div class="text-center bg-amber-500/10 border border-amber-500/20 rounded py-1.5 text-[9px] mono font-bold text-amber-400 uppercase">Volatility Contraction</div>
+                    <div class="text-center bg-slate-800 border border-slate-700 rounded py-1.5 text-[9px] mono font-bold text-slate-400 uppercase">Pause / Hold</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">09 / Marubozu</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">09 / Displacement (Marubozu)</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="relative w-12 h-16 flex items-center justify-center">
-                                <div class="w-4 h-12 bg-emerald-500 border border-emerald-400 rounded-sm shadow-[0_0_12px_rgba(16,185,129,0.4)]"></div>
+                                <div class="w-4 h-12 bg-emerald-500 rounded-sm shadow-[0_0_12px_rgba(16,185,129,0.4)]"></div>
                             </div>
-                            <span class="text-[8px] mono text-emerald-400 mt-2 uppercase font-bold">Uncontested Expansion</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Zero wick presence. Represents pure algorithmic displacement. One side completely dominates order flow delivery with absolute precision.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">The candle that *creates* the FVG. Pure algorithmic displacement leaving inefficiencies behind.</p>
                     </div>
-                    <div class="text-center bg-emerald-500/10 border border-emerald-500/20 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">Pure Order Displacement</div>
+                    <div class="text-center bg-emerald-500/10 border border-emerald-500/20 rounded py-1.5 text-[9px] mono font-bold text-emerald-400 uppercase">FVG Creator</div>
                 </div>
 
                 <div class="glass-panel p-5 hover-lift flex flex-col justify-between">
                     <div>
-                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">10 / Inside Bar</span>
+                        <span class="mono text-[10px] text-blue-400 font-bold block mb-3 uppercase">10 / Order Compression</span>
                         <div class="h-28 w-full bg-slate-950 rounded-lg border border-white/5 flex flex-col items-center justify-center mb-4 relative">
                             <div class="flex items-center justify-center gap-3 w-full h-16 mt-2">
                                 <div class="relative w-4 h-14 flex items-center justify-center">
@@ -543,14 +551,13 @@
                                 </div>
                                 <div class="relative w-4 h-10 flex items-center justify-center">
                                     <div class="absolute w-[2px] h-8 bg-slate-400"></div>
-                                    <div class="absolute w-3.5 h-6 bg-emerald-500 rounded-sm"></div>
+                                    <div class="absolute w-3 h-6 bg-emerald-500 rounded-sm"></div>
                                 </div>
                             </div>
-                            <span class="text-[8px] mono text-indigo-400 mt-2 uppercase font-bold">Coil Compression Zone</span>
                         </div>
-                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Order capacity is intentionally stored within the previous session's bounds. This coiling mechanism always precedes a volatile structural break.</p>
+                        <p class="text-slate-400 text-[10px] leading-relaxed mb-3">Forms inside an FVG before the CHoCH occurs. Indicates energy is coiling up for the breakout move.</p>
                     </div>
-                    <div class="text-center bg-indigo-500/10 border border-indigo-500/20 rounded py-1.5 text-[9px] mono font-bold text-indigo-400 uppercase">Breakout Imminent</div>
+                    <div class="text-center bg-blue-500/10 border border-blue-500/20 rounded py-1.5 text-[9px] mono font-bold text-blue-400 uppercase">Pre-Breakout Coil</div>
                 </div>
 
             </div>
@@ -562,23 +569,14 @@
         <div class="max-w-7xl mx-auto px-6 py-8 flex flex-col md:flex-row items-center justify-between gap-4">
             <p class="text-[10px] text-slate-600 uppercase tracking-widest font-semibold">&copy; 2026 BLUE TRADING | Private System Node</p>
             <div class="flex gap-4">
-                <span class="text-[10px] text-slate-500 uppercase">Internal Ping: <span class="text-blue-500 font-bold">1.4ms</span></span>
-                <span class="text-[10px] text-slate-500 uppercase">Access Status: <span class="text-blue-500 font-bold">Secured</span></span>
+                <span class="text-[10px] text-slate-500 uppercase">System Integrity: <span class="text-emerald-500 font-bold">100%</span></span>
             </div>
         </div>
     </footer>
 
     <script>
         lucide.createIcons();
-
-        // Reveal animations on load
-        gsap.from(".gsap-stagger", {
-            opacity: 0,
-            y: 25,
-            duration: 0.7,
-            stagger: 0.15,
-            ease: "power2.out"
-        });
+        gsap.from(".gsap-stagger", { opacity: 0, y: 25, duration: 0.7, stagger: 0.15, ease: "power2.out" });
     </script>
 </body>
 </html>
