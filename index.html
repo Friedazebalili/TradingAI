@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Blue Trading Gold Desk</title>
-  <meta name="description" content="Ask for a gold position and get entry, stop, take profit, size in ounces and lots, and a verdict, with high-impact news warnings and live tracking.">
+  <title>Blue Trading Gold Signals</title>
+  <meta name="description" content="High-probability gold buy and sell signals with entry, stop loss, take profit and step-by-step trade management.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -18,89 +18,56 @@
     <header class="top">
       <div class="brand">
         <span class="brand-mark" aria-hidden="true"></span>
-        <span class="brand-name">Blue Trading <em>Gold Desk</em></span>
+        <span class="brand-name">Blue Trading <em>Gold</em></span>
       </div>
       <div class="top-right">
-        <span class="feed" id="feed" data-state="idle"><i></i><span>Ready</span></span>
+        <span class="price num" id="price"></span>
+        <span class="feed" id="feed" data-state="idle" title="Price feed"><i></i></span>
+        <button class="icon-btn" id="settings-btn" type="button" aria-label="Account settings" hidden>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>
+        </button>
         <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch light or dark theme">
           <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4.5"/><path d="M12 2v2.5M12 19.5V22M2 12h2.5M19.5 12H22M4.9 4.9l1.8 1.8M17.3 17.3l1.8 1.8M4.9 19.1l1.8-1.8M17.3 6.7l1.8-1.8"/></svg>
         </button>
       </div>
     </header>
 
-    <main class="desk">
-      <section class="convo" aria-label="Gold position bot">
-        <div class="quote-bar">
-          <div class="quote">
-            <span class="label">Gold · XAU/USD</span>
-            <b class="num" id="gold-price">–</b>
-            <span class="num" id="gold-change"></span>
+    <main class="main">
+      <!-- Step 1: account. Shown first, and again from the settings button. -->
+      <section class="setup" id="setup" hidden>
+        <h1>Start with your account</h1>
+        <p>Signals are sized for your money. Enter your balance and the lot size you trade.</p>
+        <form id="setup-form" autocomplete="off">
+          <label class="big-field">
+            <span>Account balance</span>
+            <span class="money-input"><b>$</b><input id="f-balance" type="number" step="any" min="1" required inputmode="decimal" placeholder="1000"></span>
+          </label>
+          <div class="two">
+            <label class="field"><span>Lot size per trade</span><input id="f-lots" type="number" step="0.01" min="0.01" required inputmode="decimal"></label>
+            <label class="field"><span>Max risk per trade</span><span class="suffix"><input id="f-risk" type="number" step="0.5" min="0.5" required inputmode="decimal"><b>%</b></span></label>
           </div>
-          <div class="news-next" id="news-next" data-level="none"><span class="label">Next news</span><span id="news-next-text">Loading calendar…</span></div>
-        </div>
-        <div class="thread" id="thread" aria-live="polite"></div>
-
-        <form class="composer" id="composer" autocomplete="off">
-          <div class="composer-row">
-            <span class="pill">XAU/USD</span>
-            <div class="tf" id="tf" role="group" aria-label="Timeframe"></div>
-          </div>
-          <div class="ask">
-            <label for="q" class="sr-only">Ask the bot</label>
-            <input id="q" type="text" placeholder="Ask for a gold position, e.g. “15m” or “4h swing”, or ask about news">
-            <button class="btn-primary" type="submit" id="ask-btn">Get position</button>
-          </div>
-          <div class="suggest" id="suggest"></div>
+          <p class="hint" id="setup-hint"></p>
+          <button class="btn-primary wide" type="submit" id="setup-save">Show me signals</button>
         </form>
       </section>
 
-      <aside class="rail" aria-label="Account and positions">
-        <section class="card">
-          <div class="card-head"><h2>Auto-scanner</h2><span class="label" id="scan-time"></span></div>
-          <label class="check"><input type="checkbox" id="scan-on"> Scan gold every minute and post high-probability setups in the chat</label>
-          <ul class="scan" id="scan"></ul>
-        </section>
-
-        <section class="card">
-          <div class="card-head"><h2>Account</h2><span class="label">Sizing uses these</span></div>
-          <form class="fields" id="account" autocomplete="off">
-            <label>Balance ($)<input id="s-balance" type="number" step="any" min="0" inputmode="decimal" placeholder="Required"></label>
-            <label>Sizing
-              <select id="s-sizing"><option value="fixed">Fixed lot</option><option value="risk">% of balance</option></select>
-            </label>
-            <label id="s-lots-wrap">Lot size<input id="s-lots" type="number" step="0.01" min="0.01" inputmode="decimal"></label>
-            <label><span id="s-riskpct-label">Max risk per trade (%)</span><input id="s-riskpct" type="number" step="0.1" min="0" inputmode="decimal"></label>
-            <label>Daily loss limit (%)<input id="s-dailyloss" type="number" step="0.5" min="0" inputmode="decimal"></label>
-            <label>Max trades / day<input id="s-maxtrades" type="number" step="1" min="1" inputmode="numeric"></label>
-          </form>
-          <div class="today" id="today"></div>
-        </section>
-
-        <section class="card">
-          <div class="card-head"><h2>News this week</h2><span class="label" id="news-src"></span></div>
-          <ul class="news" id="news"></ul>
-        </section>
-
-        <section class="card">
-          <div class="card-head"><h2>Positions</h2><span class="label" id="pos-sync"></span></div>
-          <div id="positions"></div>
-        </section>
-
-        <section class="card">
-          <div class="card-head"><h2>Your record</h2><span class="label">Closed positions</span></div>
-          <div class="record" id="record"></div>
-          <div class="row-actions">
-            <button class="btn-quiet" id="export-csv" type="button">Export CSV</button>
-            <button class="btn-quiet" id="export-json" type="button">Back up</button>
-            <label class="btn-quiet file-btn">Restore<input type="file" id="import-json" accept="application/json"></label>
+      <!-- Step 2: signals -->
+      <section class="board" id="board" hidden>
+        <p class="alert-bar" id="alert-bar" hidden></p>
+        <div id="active"></div>
+        <article class="signal" id="signal" aria-live="polite"></article>
+        <section class="history">
+          <div class="history-head">
+            <h2>Recent signals</h2>
+            <span class="score" id="score"></span>
           </div>
-          <label class="check"><input type="checkbox" id="alerts"> Notify me when a tracked position hits its stop or target</label>
+          <ul id="history"></ul>
         </section>
-      </aside>
+      </section>
     </main>
 
     <footer class="foot">
-      <p>Gold prices come from Binance’s PAXG/USDT market (one token is one fine troy ounce of gold). It tracks spot XAU/USD closely, but your broker’s quote can differ by a few dollars, so place orders using the distances shown on each ticket. Blue Trading applies fixed rules to live prices. It cannot predict the market and is not financial advice. Your settings and positions are saved in this browser only.</p>
+      <p>Gold price from Binance PAXG/USDT, which tracks spot XAU/USD within a few dollars. Use the dollar distances from your own entry. Signals follow fixed rules and can lose. Not financial advice.</p>
     </footer>
   </div>
 

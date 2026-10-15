@@ -294,41 +294,35 @@ export function precisionWorkflow(candles, htf, structure, patterns, swings, atr
   return result;
 }
 
+// Intraday levels: the stop sits just behind the latest swing on this timeframe,
+// kept between 0.8 and 2.5 ATR. TP1 is 1R. TP2 is the nearest swing between 1.5R
+// and 3R, otherwise 2R. A setup whose proper stop is wider than 2.5 ATR is marked
+// tooWide and not traded.
 function buildPlan({ candles, bias, swings, openFvgs, workflow, atrNow }) {
   const price = candles[candles.length - 1].close;
   const dir = workflow && workflow.step >= 2 ? workflow.zone.dir : bias;
   if (dir === 0) return { dir: 0, note: 'No clear edge. Signals are mixed, so standing aside is a valid position.' };
 
-  const pad = atrNow * 0.25;
-  let stop, stopReason;
-  const recentLows = swings.lows.filter(s => s.price < price).slice(-3);
-  const recentHighs = swings.highs.filter(s => s.price > price).slice(-3);
-  if (dir > 0) {
-    if (workflow && workflow.step >= 1 && workflow.zone.dir > 0 && workflow.zone.bottom < price) {
-      stop = workflow.zone.bottom - pad; stopReason = 'below the HTF FVG';
-    } else if (recentLows.length) {
-      stop = recentLows[recentLows.length - 1].price - pad; stopReason = 'below the last swing low';
-    } else { stop = price - atrNow * 1.5; stopReason = '1.5 ATR below price'; }
-  } else {
-    if (workflow && workflow.step >= 1 && workflow.zone.dir < 0 && workflow.zone.top > price) {
-      stop = workflow.zone.top + pad; stopReason = 'above the HTF FVG';
-    } else if (recentHighs.length) {
-      stop = recentHighs[recentHighs.length - 1].price + pad; stopReason = 'above the last swing high';
-    } else { stop = price + atrNow * 1.5; stopReason = '1.5 ATR above price'; }
-  }
-  const risk = Math.abs(price - stop);
-  // Liquidity target: the nearest opposing swing at least 2R away, otherwise a flat 2R.
+  const pad = atrNow * 0.2;
+  const behind = dir > 0
+    ? swings.lows.filter(s => s.price < price).slice(-1)[0]
+    : swings.highs.filter(s => s.price > price).slice(-1)[0];
+  let dist = behind ? Math.abs(price - behind.price) + pad : atrNow * 1.2;
+  let stopReason = behind ? (dir > 0 ? 'just below the last swing low' : 'just above the last swing high') : '1.2 ATR from price';
+  const tooWide = dist > atrNow * 2.5;
+  if (dist < atrNow * 0.8) { dist = atrNow * 0.8; stopReason = 'outside normal noise (0.8 ATR)'; }
+  const stop = price - dir * dist;
+
   const pool = (dir > 0 ? swings.highs.filter(s => s.price > price) : swings.lows.filter(s => s.price < price))
     .map(s => s.price)
-    .filter(p => Math.abs(p - price) >= risk * 2)
-    .sort((a, b) => Math.abs(a - price) - Math.abs(b - price));
-  const target = pool.length ? pool[0] : price + dir * risk * 2;
-  const targetReason = pool.length ? (dir > 0 ? 'buy-side liquidity at a swing high' : 'sell-side liquidity at a swing low') : '2R projection';
-  const tooTight = risk < atrNow * 0.5;
+    .filter(p => Math.abs(p - price) >= dist * 1.5 && Math.abs(p - price) <= dist * 3)
+    .sort((x, y) => Math.abs(x - price) - Math.abs(y - price));
+  const target = pool.length ? pool[0] - dir * atrNow * 0.1 : price + dir * dist * 2;
+  const targetReason = pool.length ? (dir > 0 ? 'just under the next swing high' : 'just above the next swing low') : '2× the stop distance';
   return {
     dir, entry: price, stop, target, stopReason, targetReason,
-    rr: Math.abs(target - price) / (risk || 1),
-    tooTight,
+    rr: Math.abs(target - price) / dist,
+    tooTight: false, tooWide,
     nearFvg: openFvgs.filter(g => g.dir === dir).slice(-1)[0] || null,
   };
 }
@@ -374,7 +368,7 @@ export function backtest(candles, htfCandles, strategyId = 'workflow', opts = {}
   const strat = STRATEGIES[strategyId];
   const window = opts.window || 250;
   const htfStep = opts.htfStep || 3600;
-  const minRR = opts.minRR ?? 2;
+  const minRR = opts.minRR ?? 1.5;
   const trades = [];
   let pos = null;
   for (let i = 80; i < candles.length; i++) {
@@ -397,7 +391,7 @@ export function backtest(candles, htfCandles, strategyId = 'workflow', opts = {}
     if (!a) continue;
     const localIdx = slice.length - 1;
     const dir = strat.signal(a, localIdx);
-    if (!dir || a.plan.dir !== dir || a.plan.tooTight || a.plan.rr < minRR) continue;
+    if (!dir || a.plan.dir !== dir || a.plan.tooWide || a.plan.rr < minRR) continue;
     pos = { dir, entry: c.close, stop: a.plan.stop, target: a.plan.target, time: c.time };
   }
   const n = trades.length;
