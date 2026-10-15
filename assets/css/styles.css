@@ -290,6 +290,20 @@ button, input, select { font: inherit; color: inherit; }
   *, *::before, *::after { animation: none !important; transition: none !important; }
 }
 
+/* ---------- scanner ---------- */
+.scan { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.scan li { display: flex; justify-content: space-between; align-items: center; gap: 6px; padding: 7px 10px; border-radius: 8px; background: var(--raised); font-size: 13px; }
+.scan li .num { font-weight: 600; }
+.scan li span:last-child { font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); }
+.scan li[data-v="go"] { background: var(--up-soft); }
+.scan li[data-v="go"] span:last-child { color: var(--up); }
+.scan li[data-v="wait"] span:last-child { color: var(--warn); }
+.msg.bot .auto-tag { display: inline-block; margin-bottom: 6px; font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--up); }
+.setup .setup-fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 10px; margin: 14px 0; }
+.setup label { display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; color: var(--muted); }
+.setup input { border: 1px solid var(--line); background: var(--bg); border-radius: 8px; padding: 8px 10px; font-family: var(--mono); font-size: 14px; min-width: 0; }
+.setup input:focus { outline: none; border-color: var(--accent); }
+
 /* ---------- gold quote & news ---------- */
 .quote-bar { display: flex; flex-wrap: wrap; align-items: stretch; gap: 10px; margin-bottom: 16px; max-width: 760px; }
 .quote { display: flex; align-items: baseline; flex-wrap: wrap; gap: 4px 12px; padding: 10px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--r); }

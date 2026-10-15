@@ -56,10 +56,20 @@
 
       <aside class="rail" aria-label="Account and positions">
         <section class="card">
+          <div class="card-head"><h2>Auto-scanner</h2><span class="label" id="scan-time"></span></div>
+          <label class="check"><input type="checkbox" id="scan-on"> Scan gold every minute and post high-probability setups in the chat</label>
+          <ul class="scan" id="scan"></ul>
+        </section>
+
+        <section class="card">
           <div class="card-head"><h2>Account</h2><span class="label">Sizing uses these</span></div>
           <form class="fields" id="account" autocomplete="off">
-            <label>Balance ($)<input id="s-balance" type="number" step="any" min="0" inputmode="decimal"></label>
-            <label>Risk per trade (%)<input id="s-riskpct" type="number" step="0.1" min="0" inputmode="decimal"></label>
+            <label>Balance ($)<input id="s-balance" type="number" step="any" min="0" inputmode="decimal" placeholder="Required"></label>
+            <label>Sizing
+              <select id="s-sizing"><option value="fixed">Fixed lot</option><option value="risk">% of balance</option></select>
+            </label>
+            <label id="s-lots-wrap">Lot size<input id="s-lots" type="number" step="0.01" min="0.01" inputmode="decimal"></label>
+            <label><span id="s-riskpct-label">Max risk per trade (%)</span><input id="s-riskpct" type="number" step="0.1" min="0" inputmode="decimal"></label>
             <label>Daily loss limit (%)<input id="s-dailyloss" type="number" step="0.5" min="0" inputmode="decimal"></label>
             <label>Max trades / day<input id="s-maxtrades" type="number" step="1" min="1" inputmode="numeric"></label>
           </form>

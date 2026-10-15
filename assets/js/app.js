@@ -2,7 +2,7 @@ import { fmt, pct, HTF_FOR } from './analysis.js';
 import { TIMEFRAMES, fetchPrices, fetchMinuteCandlesSince, fetchTicker } from './data.js';
 import * as J from './journal.js';
 import { ask, money } from './coach.js';
-import { parse, readMarket, cached, ticket, HELP, GOLD } from './bot.js';
+import { parse, readMarket, cached, ticket, HELP, UNKNOWN, GOLD } from './bot.js';
 import { loadCalendar, upcoming, conditions, fmtIn } from './news.js';
 
 const $ = sel => document.querySelector(sel);
@@ -14,6 +14,8 @@ const store = {
 const state = {
   symbol: GOLD,
   calendar: null,
+  scan: {},
+  seen: new Set((() => { try { return JSON.parse(store.get('blue-trading.seen', '[]')); } catch { return []; } })()),
   warned: new Set(),
   tf: store.get('blue-trading.tf', '15m'),
   settings: J.loadSettings(),
@@ -41,7 +43,7 @@ function buildComposer() {
     if (b) setTf(b.dataset.tf);
   });
 
-  const suggestions = ['Gold 15m position', '5m scalp', '4h swing', 'What news is coming?', 'What invalidates it?', 'Am I within my risk today?', 'Review my trades'];
+  const suggestions = ['Give me a position', 'What’s gold doing on the 4h?', 'What news is coming?', 'Why this call?', 'What is an FVG?', 'Best time to trade gold?', 'Am I within my risk today?'];
   $('#suggest').innerHTML = suggestions.map(s => `<button type="button" class="chip">${s}</button>`).join('');
   $('#suggest').addEventListener('click', e => {
     const b = e.target.closest('.chip');
@@ -83,6 +85,11 @@ async function handle(text) {
   if (q.tf) setTf(q.tf);
 
   if (q.intent === 'help') { sayLines(HELP); return; }
+  if (q.intent === 'topic') { sayLines(q.topic); return; }
+  if (q.intent === 'unknown') { sayLines(UNKNOWN); return; }
+  if (q.intent === 'price') { await priceReply(); return; }
+  if (q.intent === 'why') { whyReply(); return; }
+  if (q.intent === 'market') { await marketReply(state.tf); return; }
   if (q.intent === 'news') { sayLines(newsReply()); return; }
   if (q.intent === 'review') { sayLines(ask('review', ctx())); return; }
   if (q.intent === 'risk') { sayLines(ask('risk', ctx())); return; }
@@ -92,8 +99,89 @@ async function handle(text) {
     sayLines(ask('invalid', { ...ctx(), analysis: read.analysis }));
     return;
   }
+  if (!state.settings.configured) {
+    state.pendingTf = state.tf;
+    askBalance('Before I give you a trade, I need your account balance so I can tell you what each position risks.');
+    return;
+  }
   await position(state.tf);
 }
+
+async function priceReply() {
+  const tk = await fetchTicker(GOLD);
+  if (!tk) { sayLines({ title: 'Live price unavailable', lines: [{ tone: 'warn', text: 'I couldn’t reach the price feed from this network. Try again in a moment.' }] }); return; }
+  sayLines({ title: `Gold is at ${fmt(tk.price)}`, lines: [
+    { tone: tk.changePct >= 0 ? 'good' : 'bad', text: `${tk.changePct >= 0 ? 'Up' : 'Down'} ${pct(Math.abs(tk.changePct))} over the last 24 hours.` },
+    { tone: 'info', text: 'This is the PAXG price, which tracks spot XAU/USD closely. Your broker may differ by a few dollars.' },
+  ] });
+}
+
+function whyReply() {
+  const t = state.lastTicket;
+  if (!t) { sayLines({ title: 'No ticket yet', lines: [{ tone: 'info', text: 'Ask for a position first, then ask me why.' }] }); return; }
+  const lines = [];
+  lines.push({ tone: 'info', text: t.dir ? `I called ${t.dir > 0 ? 'long' : 'short'} on the ${t.tf} with a “${{ go: 'Take it', wait: 'Wait', skip: 'Skip' }[t.verdict]}” verdict.` : `I said stand aside on the ${t.tf}. ${t.note}` });
+  for (const w of t.warnings) lines.push({ tone: w.tone, text: w.text });
+  for (const c of t.checks) lines.push(c);
+  for (const r of t.reasons) lines.push({ tone: r.dir > 0 ? 'good' : r.dir < 0 ? 'bad' : 'info', text: r.text });
+  if (t.waitingFor) lines.push({ tone: 'warn', text: `Still waiting for ${t.waitingFor}.` });
+  sayLines({ title: 'Why I made that call', lines });
+}
+
+async function marketReply(tf) {
+  const wait = say(`<div class="thinking"><span></span><span></span><span></span> Reading gold on the ${tf}…</div>`);
+  try {
+    const read = await readMarket(tf);
+    wait.remove();
+    const m = ask('setup', { ...ctx(), analysis: read.analysis, symbol: 'Gold', tf });
+    m.lines.push({ tone: 'info', text: 'Want levels? Ask “give me a position”.' });
+    sayLines(m);
+  } catch (err) {
+    wait.remove();
+    sayLines({ title: 'I couldn’t read the gold market', lines: [{ tone: 'bad', text: err.message }] });
+  }
+}
+
+function askBalance(reason) {
+  const open = [...document.querySelectorAll('form[data-setup]')].find(f => !f.dataset.saved);
+  if (open) {
+    sayLines({ title: 'Account balance needed', lines: [{ tone: 'warn', text: 'Fill in the account setup above first, then I’ll give you the position.' }] });
+    open.querySelector('input').focus({ preventScroll: true });
+    return;
+  }
+  const s = state.settings;
+  say(`<form class="note setup" data-setup>
+    <h3>Set up your account</h3>
+    <p>${esc(reason)} It stays in this browser only.</p>
+    <div class="setup-fields">
+      <label>Account balance ($)<input name="balance" type="number" step="any" min="1" required inputmode="decimal" placeholder="e.g. 1000" value="${s.balance || ''}"></label>
+      <label>Lot size per trade<input name="lots" type="number" step="0.01" min="0.01" required inputmode="decimal" value="${s.lots}"></label>
+      <label>Max risk per trade (%)<input name="riskPct" type="number" step="0.1" min="0.1" required inputmode="decimal" value="${s.riskPct}"></label>
+    </div>
+    <button class="btn-primary" type="submit">Save and continue</button>
+  </form>`);
+}
+
+$('#thread').addEventListener('submit', e => {
+  const f = e.target.closest('form[data-setup]');
+  if (!f) return;
+  e.preventDefault();
+  const v = name => parseFloat(f.elements[name].value);
+  if (!(v('balance') > 0)) { toast('Enter your account balance'); return; }
+  state.settings = { ...state.settings, balance: v('balance'), lots: v('lots') || 0.03, riskPct: v('riskPct') || 2, sizing: 'fixed', configured: true };
+  J.saveSettings(state.settings);
+  buildAccount();
+  renderToday();
+  f.dataset.saved = '1';
+  f.querySelectorAll('input, button').forEach(el => { el.disabled = true; });
+  f.querySelector('button').textContent = 'Saved';
+  sayLines({ title: 'All set', lines: [
+    { tone: 'good', text: `Balance ${money(state.settings.balance)}, ${state.settings.lots} lots per trade, max ${state.settings.riskPct}% risk per trade.` },
+    { tone: 'info', text: `At ${state.settings.lots} lots, every $1 gold moves is ${money(state.settings.lots * 100)} on your account.` },
+    { tone: 'info', text: 'Now press Get position, or ask me anything about gold.' },
+  ] });
+  if (state.pendingTf) { const tf = state.pendingTf; state.pendingTf = null; position(tf); }
+});
 
 async function position(tf) {
   const symbol = GOLD;
@@ -107,6 +195,7 @@ async function position(tf) {
     const id = `t${Date.now()}`;
     state.tickets.set(id, t);
     state.last = { symbol, tf };
+    state.lastTicket = t;
     wait.remove();
     say(renderTicket(t, id));
     setFeed(read.source === 'live' ? 'live' : 'demo', read.source === 'live' ? 'Live prices' : 'Demo prices');
@@ -181,8 +270,8 @@ function renderTicket(t, id) {
       ${levels.map(([k, v, d, sub]) => `<div class="lv"><span class="label">${k}</span><b class="num ${d}">${fmt(v)}</b><span class="dist num">${sub}</span></div>`).join('')}
     </div>
     <div class="sizing">
-      <div><span class="label">Size</span><b class="num">${lotFmt(t.lots)} lots</b><span class="fine num">${t.qty.toFixed(2)} oz · ${money(t.notional)} notional</span></div>
-      <div><span class="label">Risk</span><b class="num down">${money(-t.riskAmt)}</b><span class="fine">${state.settings.riskPct}% of balance</span></div>
+      <div><span class="label">Size</span><b class="num">${lotFmt(t.lots)} lots</b><span class="fine num">${t.fixed ? 'your fixed size · ' : ''}${t.qty.toFixed(2)} oz · ${money(t.qty)} per $1 move</span></div>
+      <div><span class="label">Risk if stopped</span><b class="num down">${money(-t.riskAmt)}</b><span class="fine">${t.riskPctOfBalance == null ? 'set your balance' : `${t.riskPctOfBalance.toFixed(1)}% of balance`}</span></div>
       <div><span class="label">Reward at TP 2</span><b class="num up">${money(t.rewardAmt)}</b><span class="fine">before fees</span></div>
     </div>
     ${t.waitingFor ? `<p class="t-wait"><span class="label">Before entering, wait for</span>${esc(t.waitingFor)}</p>` : ''}
@@ -402,18 +491,81 @@ async function refreshQuote() {
   setFeed('live', 'Live prices');
 }
 
+/* ---------- auto-scanner ---------- */
+// Re-reads gold on several timeframes each minute. A setup is posted to the chat
+// only when its ticket says "Take it" (all rules pass, no news block, risk within max),
+// and only once per setup.
+const SCAN_TFS = ['5m', '15m', '1h', '4h'];
+const VERDICT_SHORT = { go: 'Take it', wait: 'Wait', skip: 'No trade' };
+let scanning = false;
+async function scan() {
+  if (scanning || !$('#scan-on').checked) return;
+  scanning = true;
+  try {
+    for (const tf of SCAN_TFS) {
+      try {
+        const read = await readMarket(tf);
+        const t = ticket(read, state.settings, state.trades, state.calendar);
+        state.scan[tf] = t;
+        const key = `${tf}:${t.dir}:${t.workflow && t.workflow.zone ? t.workflow.zone.time : ''}:${Math.round(t.stop || 0)}`;
+        if (t.verdict === 'go' && t.source === 'live' && state.settings.configured && !state.seen.has(key)) {
+          state.seen.add(key);
+          store.set('blue-trading.seen', JSON.stringify([...state.seen].slice(-50)));
+          const id = `t${Date.now()}${tf}`;
+          state.tickets.set(id, t);
+          state.lastTicket = t;
+          const el = say(renderTicket(t, id));
+          el.insertAdjacentHTML('afterbegin', `<span class="auto-tag">Auto-scanner found a setup · ${tf}</span>`);
+          notify(`Gold ${t.dir > 0 ? 'LONG' : 'SHORT'} setup on the ${tf}. Entry ${fmt(t.entry)}, SL ${fmt(t.stop)}, TP ${fmt(t.tp2)}.`, true);
+        }
+      } catch { /* skip this timeframe this round */ }
+    }
+    renderScan();
+  } finally { scanning = false; }
+}
+function renderScan() {
+  $('#scan').innerHTML = SCAN_TFS.map(tf => {
+    const t = state.scan[tf];
+    const v = t ? (t.source === 'demo' ? 'demo' : t.verdict) : 'idle';
+    const label = !t ? '…' : t.source === 'demo' ? 'Demo' : t.dir && t.verdict !== 'skip' ? `${t.dir > 0 ? 'Long' : 'Short'} · ${VERDICT_SHORT[t.verdict]}` : 'No trade';
+    return `<li data-v="${v}"><span class="num">${tf}</span><span>${label}</span></li>`;
+  }).join('');
+  $('#scan-time').textContent = $('#scan-on').checked ? `Checked ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Off';
+}
+$('#scan-on').checked = store.get('blue-trading.scan', '1') === '1';
+$('#scan-on').addEventListener('change', async e => {
+  store.set('blue-trading.scan', e.target.checked ? '1' : '0');
+  renderScan();
+  if (e.target.checked) {
+    try { if (Notification.permission === 'default') await Notification.requestPermission(); } catch { /* unsupported */ }
+    toast('Scanner on. Keep this tab open and I’ll post setups as they appear.');
+    scan();
+  }
+});
+
 /* ---------- account ---------- */
 function buildAccount() {
   const s = state.settings;
-  $('#s-balance').value = s.balance; $('#s-riskpct').value = s.riskPct;
+  $('#s-balance').value = s.balance || ''; $('#s-riskpct').value = s.riskPct;
+  $('#s-sizing').value = s.sizing; $('#s-lots').value = s.lots;
   $('#s-dailyloss').value = s.dailyLossPct; $('#s-maxtrades').value = s.maxTrades;
+  syncSizingFields();
+}
+function syncSizingFields() {
+  const fixed = $('#s-sizing').value === 'fixed';
+  $('#s-lots-wrap').hidden = !fixed;
+  $('#s-riskpct-label').textContent = fixed ? 'Max risk per trade (%)' : 'Risk per trade (%)';
 }
 $('#account').addEventListener('input', () => {
   const v = id => parseFloat($(id).value);
+  const balance = v('#s-balance') || 0;
   state.settings = {
-    balance: v('#s-balance') || 0, riskPct: v('#s-riskpct') || 0,
+    balance, riskPct: v('#s-riskpct') || 0,
+    sizing: $('#s-sizing').value, lots: Math.max(0.01, v('#s-lots') || 0.03),
     dailyLossPct: v('#s-dailyloss') || 0, maxTrades: Math.max(1, Math.round(v('#s-maxtrades') || 1)),
+    configured: balance > 0,
   };
+  syncSizingFields();
   J.saveSettings(state.settings);
   renderToday();
 });
@@ -437,9 +589,9 @@ $('#alerts').addEventListener('change', async e => {
   try { if (Notification.permission === 'default') await Notification.requestPermission(); } catch { /* unsupported */ }
   toast('Alerts on. Keep this tab open to receive them.');
 });
-function notify(text) {
+function notify(text, force = false) {
   toast(text);
-  if (!$('#alerts').checked) return;
+  if (!force && !$('#alerts').checked) return;
   try {
     const ctx = notify.ctx || (notify.ctx = new AudioContext());
     const o = ctx.createOscillator(), g = ctx.createGain();
@@ -492,7 +644,8 @@ function toast(text) {
 buildComposer();
 buildAccount();
 renderRail();
-say(`<div class="note intro"><h3>Ask me for a gold position.</h3><p>Pick a timeframe and press <b>Get position</b>, or type something like <b>15m</b>, <b>scalp</b> or <b>4h swing</b>. I read the live gold chart and reply with the entry, stop, take profits and lot size for your account. I hold you back when high-impact USD news is close, and I can tell you what news is coming.</p></div>`);
+say(`<div class="note intro"><h3>Your gold trading assistant.</h3><p>Press <b>Get position</b> or say <b>give me a position</b> for a trade ticket with entry, stop and take profits. Or just ask: <b>what’s gold doing on the 4h?</b>, <b>what news is coming?</b>, <b>what is a CHoCH?</b>, <b>why short?</b></p></div>`);
+if (!state.settings.configured) askBalance('First, tell me your account balance and the lot size you trade, so every ticket shows what it risks.');
 refreshCalendar();
 refreshQuote();
 sync();
@@ -500,3 +653,6 @@ setInterval(sync, 30000);
 setInterval(refreshQuote, 15000);
 setInterval(renderNews, 60000);
 setInterval(refreshCalendar, 30 * 60000);
+renderScan();
+setTimeout(scan, 4000);
+setInterval(scan, 60000);
