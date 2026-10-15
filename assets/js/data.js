@@ -71,7 +71,8 @@ export function demoCandles(symbol, interval, limit = 500) {
   let seed = [...symbol + interval].reduce((a, ch) => (a * 31 + ch.charCodeAt(0)) % 2147483647, 7) || 7;
   const rand = () => (seed = (seed * 16807) % 2147483647) / 2147483647;
   const base = { BTCUSDT: 64000, ETHUSDT: 3200, SOLUSDT: 150, XRPUSDT: 0.6, BNBUSDT: 580, DOGEUSDT: 0.15, PAXGUSDT: 4000, EURUSDT: 1.08 }[symbol] || 100;
-  const vol = Math.sqrt(step / 3600) * 0.006;
+  // Hourly volatility: about 0.25% for gold, 0.6% for crypto.
+  const vol = Math.sqrt(step / 3600) * (symbol === 'PAXGUSDT' ? 0.0025 : 0.006);
   const now = Math.floor(Date.now() / 1000 / step) * step;
   let price = base, drift = 0;
   const out = [];
@@ -136,4 +137,26 @@ export async function fetchTicker(symbol) {
     const r = await res.json();
     return { price: +r.lastPrice, changePct: +r.priceChangePercent / 100 };
   } catch { return null; }
+}
+
+// Candles for the last `days` days, paged backwards 1000 at a time. Returns null if unreachable.
+export async function fetchHistory(symbol, interval, days, onProgress) {
+  const step = SECONDS[interval] * 1000;
+  const start = Date.now() - days * 86400000;
+  let end = Date.now();
+  const out = [];
+  try {
+    while (end > start) {
+      const res = await fetch(`${REST}/klines?symbol=${encodeURIComponent(symbol)}&interval=${interval}&endTime=${end}&limit=1000`);
+      if (!res.ok) return null;
+      const rows = await res.json();
+      if (!rows.length) break;
+      out.unshift(...rows.map(toCandle));
+      end = rows[0][0] - 1;
+      onProgress && onProgress(Math.min(1, (Date.now() - end) / (Date.now() - start)));
+      if (rows.length < 1000) break;
+    }
+  } catch { return null; }
+  const seen = new Set();
+  return out.filter(c => c.time * 1000 >= start - step && !seen.has(c.time) && seen.add(c.time));
 }

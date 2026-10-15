@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>Blue Trading Gold Signals</title>
-  <meta name="description" content="High-probability gold buy and sell signals with entry, stop loss, take profit and step-by-step trade management.">
+  <title>Blue Trading Gold Breakout</title>
+  <meta name="description" content="The London breakout rule for gold: today’s two orders with stop and target, tested live on the last six months of gold prices.">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500..800&family=Instrument+Sans:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap">
@@ -36,7 +36,7 @@
       <!-- Step 1: account. Shown first, and again from the settings button. -->
       <section class="setup" id="setup" hidden>
         <h1>Start with your account</h1>
-        <p>Signals are sized for your money. Enter your balance and the lot size you trade.</p>
+        <p>Every order is checked against your money. Enter your balance and the lot size you trade.</p>
         <form id="setup-form" autocomplete="off">
           <label class="big-field">
             <span>Account balance</span>
@@ -47,27 +47,24 @@
             <label class="field"><span>Max risk per trade</span><span class="suffix"><input id="f-risk" type="number" step="0.5" min="0.5" required inputmode="decimal"><b>%</b></span></label>
           </div>
           <p class="hint" id="setup-hint"></p>
-          <button class="btn-primary wide" type="submit" id="setup-save">Show me signals</button>
+          <button class="btn-primary wide" type="submit" id="setup-save">Show today’s plan</button>
         </form>
       </section>
 
-      <!-- Step 2: signals -->
+      <!-- Step 2: today's plan -->
       <section class="board" id="board" hidden>
         <p class="alert-bar" id="alert-bar" hidden></p>
-        <div id="active"></div>
-        <article class="signal" id="signal" aria-live="polite"></article>
+        <article class="today" id="today" aria-live="polite"></article>
+        <section class="record" id="record"></section>
         <section class="history">
-          <div class="history-head">
-            <h2>Recent signals</h2>
-            <span class="score" id="score"></span>
-          </div>
+          <div class="history-head"><h2>Last 10 trading days</h2><span class="score" id="score"></span></div>
           <ul id="history"></ul>
         </section>
       </section>
     </main>
 
     <footer class="foot">
-      <p>Gold price from Binance PAXG/USDT, which tracks spot XAU/USD within a few dollars. Use the dollar distances from your own entry. Signals follow fixed rules and can lose. Not financial advice.</p>
+      <p>Gold price from Binance PAXG/USDT, which tracks spot XAU/USD within a few dollars, so your broker’s levels can differ slightly. Rules from the published “London Breakout on Gold” study. Past results don’t guarantee future results. Not financial advice.</p>
     </footer>
   </div>
 
