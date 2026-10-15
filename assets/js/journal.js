@@ -11,7 +11,9 @@ export const SETUPS = [
   'Other',
 ];
 
-export const DEFAULT_SETTINGS = { balance: 10000, riskPct: 1, dailyLossPct: 3, maxTrades: 4 };
+// sizing: 'fixed' trades the same lot size every time; 'risk' sizes from riskPct.
+// In fixed mode riskPct is the most a single trade may risk.
+export const DEFAULT_SETTINGS = { balance: 0, sizing: 'fixed', lots: 0.03, riskPct: 2, dailyLossPct: 3, maxTrades: 4, configured: false };
 
 function read(key, fallback) {
   try {

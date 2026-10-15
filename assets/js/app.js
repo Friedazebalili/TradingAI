@@ -1,10 +1,12 @@
-import { fmt, pct, HTF_FOR } from './analysis.js';
-import { TIMEFRAMES, fetchPrices, fetchMinuteCandlesSince, fetchTicker } from './data.js';
+import { fmt } from './analysis.js';
+import { fetchCandles, fetchHistory, fetchTicker, demoCandles } from './data.js';
 import * as J from './journal.js';
-import { ask, money } from './coach.js';
-import { parse, readMarket, cached, ticket, HELP, GOLD } from './bot.js';
-import { loadCalendar, upcoming, conditions, fmtIn } from './news.js';
+import { loadCalendar, upcoming, conditions } from './news.js';
+import { RULES, playDays, summarize, server, serverHourToMs } from './london.js';
 
+const GOLD = 'PAXGUSDT';
+const HISTORY_DAYS = 180;
+const STUDY_URL = 'https://www.mql5.com/en/blogs/post/777540';
 const $ = sel => document.querySelector(sel);
 const store = {
   get(k, d) { try { return localStorage.getItem(k) ?? d; } catch { return d; } },
@@ -12,16 +14,13 @@ const store = {
 };
 
 const state = {
-  symbol: GOLD,
-  calendar: null,
-  warned: new Set(),
-  tf: store.get('blue-trading.tf', '15m'),
   settings: J.loadSettings(),
-  trades: J.loadTrades(),
-  prices: {},
-  tickets: new Map(),
-  last: null,
-  busy: false,
+  candles: null,
+  source: null,
+  days: [],
+  price: null,
+  calendar: null,
+  loading: 0,
 };
 
 /* ---------- theme ---------- */
@@ -32,471 +31,302 @@ $('#theme-toggle').addEventListener('click', () => {
   store.set('blue-trading.theme', next);
 });
 
-/* ---------- composer ---------- */
-function buildComposer() {
-  const tf = $('#tf');
-  tf.innerHTML = TIMEFRAMES.map(t => `<button type="button" data-tf="${t}" aria-pressed="${t === state.tf}">${t}</button>`).join('');
-  tf.addEventListener('click', e => {
-    const b = e.target.closest('button');
-    if (b) setTf(b.dataset.tf);
-  });
-
-  const suggestions = ['Gold 15m position', '5m scalp', '4h swing', 'What news is coming?', 'What invalidates it?', 'Am I within my risk today?', 'Review my trades'];
-  $('#suggest').innerHTML = suggestions.map(s => `<button type="button" class="chip">${s}</button>`).join('');
-  $('#suggest').addEventListener('click', e => {
-    const b = e.target.closest('.chip');
-    if (b) handle(b.textContent);
-  });
-
-  $('#composer').addEventListener('submit', e => {
-    e.preventDefault();
-    const q = $('#q').value.trim();
-    $('#q').value = '';
-    handle(q || `Gold ${state.tf} position`);
-  });
+/* ---------- account setup (always first) ---------- */
+function showSetup(editing = false) {
+  const s = state.settings;
+  $('#f-balance').value = s.configured ? s.balance : '';
+  $('#f-lots').value = s.lots;
+  $('#f-risk').value = s.riskPct;
+  $('#setup-save').textContent = editing ? 'Save' : 'Show today’s plan';
+  $('#setup').hidden = false;
+  $('#board').hidden = true;
+  $('#settings-btn').hidden = true;
+  setupHint();
+  $('#f-balance').focus();
 }
-
-function setTf(tf) {
-  state.tf = tf;
-  store.set('blue-trading.tf', tf);
-  $('#tf').querySelectorAll('button').forEach(x => x.setAttribute('aria-pressed', x.dataset.tf === tf));
+function showBoard() {
+  $('#setup').hidden = true;
+  $('#board').hidden = false;
+  $('#settings-btn').hidden = false;
+  render();
 }
-
-/* ---------- conversation ---------- */
-function say(html, who = 'bot') {
-  const el = document.createElement('div');
-  el.className = `msg ${who}`;
-  el.innerHTML = html;
-  $('#thread').append(el);
-  el.scrollIntoView({ behavior: 'smooth', block: 'end' });
-  return el;
+function setupHint() {
+  const bal = parseFloat($('#f-balance').value), lots = parseFloat($('#f-lots').value), risk = parseFloat($('#f-risk').value);
+  if (!(lots > 0)) { $('#setup-hint').textContent = ''; return; }
+  let text = `At ${lots} lots, every $1 gold moves is $${(lots * 100).toFixed(2)} on your account.`;
+  if (bal > 0 && risk > 0) text += ` A ${risk}% max risk is $${(bal * risk / 100).toFixed(2)} per trade.`;
+  $('#setup-hint').textContent = text;
 }
-
-function sayLines(m) {
-  return say(`<div class="note"><h3>${esc(m.title)}</h3><ul>${m.lines.map(l => `<li data-tone="${l.tone}">${esc(l.text)}</li>`).join('')}</ul></div>`);
-}
-
-async function handle(text) {
-  if (state.busy) return;
-  say(esc(text), 'me');
-  const q = parse(text);
-  if (q.tf) setTf(q.tf);
-
-  if (q.intent === 'help') { sayLines(HELP); return; }
-  if (q.intent === 'news') { sayLines(newsReply()); return; }
-  if (q.intent === 'review') { sayLines(ask('review', ctx())); return; }
-  if (q.intent === 'risk') { sayLines(ask('risk', ctx())); return; }
-  if (q.intent === 'invalid') {
-    const read = state.last && cached(state.last.symbol, state.last.tf);
-    if (!read) { sayLines({ title: 'Ask for a position first', lines: [{ tone: 'info', text: 'Get a position on a market, then ask what invalidates it.' }] }); return; }
-    sayLines(ask('invalid', { ...ctx(), analysis: read.analysis }));
-    return;
-  }
-  await position(state.tf);
-}
-
-async function position(tf) {
-  const symbol = GOLD;
-  state.busy = true;
-  $('#ask-btn').disabled = true;
-  setFeed('loading', `Reading ${symbol}`);
-  const wait = say(`<div class="thinking"><span></span><span></span><span></span> Reading gold on the ${tf} and ${HTF_FOR[tf]} charts…</div>`);
-  try {
-    const read = await readMarket(tf);
-    const t = ticket(read, state.settings, state.trades, state.calendar);
-    const id = `t${Date.now()}`;
-    state.tickets.set(id, t);
-    state.last = { symbol, tf };
-    wait.remove();
-    say(renderTicket(t, id));
-    setFeed(read.source === 'live' ? 'live' : 'demo', read.source === 'live' ? 'Live prices' : 'Demo prices');
-    if (read.source === 'demo') {
-      $('#gold-price').textContent = fmt(t.price);
-      $('#gold-change').textContent = 'demo';
-      $('#gold-change').className = 'num fine';
-    }
-  } catch (err) {
-    wait.remove();
-    sayLines({ title: 'I couldn’t read the gold market', lines: [{ tone: 'bad', text: err.message }, { tone: 'info', text: 'Try again in a moment.' }] });
-    setFeed('error', 'Price feed error');
-  } finally {
-    state.busy = false;
-    $('#ask-btn').disabled = false;
-  }
-}
-
-const VERDICT = { go: 'Take it', wait: 'Wait', skip: 'Skip' };
-
-function renderTicket(t, id) {
-  const dirKey = t.dir > 0 ? 'up' : t.dir < 0 ? 'down' : 'flat';
-  const r = t.record;
-  const time = new Date(t.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  const demo = t.source === 'demo' ? '<p class="demo">Live prices could not be reached from this network. These levels come from demo data, so don’t trade them.</p>' : '';
-  const warn = t.warnings.length ? `<ul class="alerts">${t.warnings.map(w => `<li data-tone="${w.tone}">${esc(w.text)}</li>`).join('')}</ul>` : '';
-  const why = list => list.map(x => `<li data-dir="${x.dir}">${esc(x.text)}</li>`).join('');
-  const reasons = t.reasons.map(x => ({ dir: x.dir > 0 ? 'up' : x.dir < 0 ? 'down' : 'flat', text: x.text }));
-  const recordHtml = r.n
-    ? `<div class="rec">
-        <span class="label">Same rules, last ${r.n} signal${r.n === 1 ? '' : 's'} on gold ${t.tf}</span>
-        <div class="rec-stats">
-          <span><b class="num">${pct(r.winRate)}</b> win rate</span>
-          <span><b class="num ${r.avgR > 0 ? 'up' : 'down'}">${r.avgR > 0 ? '+' : ''}${r.avgR.toFixed(2)}R</b> avg</span>
-          <span><b class="num ${r.totalR > 0 ? 'up' : 'down'}">${r.totalR > 0 ? '+' : ''}${r.totalR.toFixed(1)}R</b> total</span>
-        </div>
-        ${r.n < 20 ? '<p class="fine">Small sample. Treat it as a hint, not proof.</p>' : ''}
-      </div>`
-    : `<div class="rec"><span class="label">Track record</span><p class="fine">These rules produced no completed signals in the recent ${esc(t.tf)} history, so there is no record yet.</p></div>`;
-
-  if (!t.dir) {
-    return `<article class="ticket" data-dir="flat">
-      <header class="t-head">
-        <div class="t-id"><span class="t-sym">XAU/USD</span><span class="t-tf">${t.tf} · ${time}</span></div>
-        <span class="verdict" data-v="skip">No trade</span>
-      </header>
-      <div class="t-side flat">Stand aside</div>
-      ${warn}
-      <p class="t-lead">Price <b class="num">${fmt(t.price)}</b>. ${esc(t.note)}</p>
-      ${t.waitingFor ? `<p class="t-wait"><span class="label">Waiting for</span>${esc(t.waitingFor)}</p>` : ''}
-      <ul class="why">${why(reasons)}</ul>
-      ${demo}
-      <footer class="t-actions"><button type="button" class="btn-quiet" data-act="refresh" data-id="${id}">Check again</button></footer>
-    </article>`;
-  }
-
-  const levels = [
-    ['Entry', t.entry, '', 'market'],
-    ['Stop loss', t.stop, 'down', usd(t.stop - t.entry)],
-    ['Take profit 1', t.tp1, 'up', `1R · ${usd(t.tp1 - t.entry)}`],
-    ['Take profit 2', t.tp2, 'up', `${t.rr.toFixed(1)}R · ${usd(t.tp2 - t.entry)}`],
-  ];
-  const checks = t.checks.map(c => ({ dir: c.tone === 'good' ? 'up' : c.tone === 'bad' ? 'down' : 'warn', text: c.text }));
-  return `<article class="ticket" data-dir="${dirKey}">
-    <header class="t-head">
-      <div class="t-id"><span class="t-sym">XAU/USD</span><span class="t-tf">${t.tf} · ${time}</span></div>
-      <span class="verdict" data-v="${t.verdict}">${VERDICT[t.verdict]}</span>
-    </header>
-    <div class="t-side ${dirKey}">${t.dir > 0 ? 'Long' : 'Short'}</div>
-    ${warn}
-    <div class="levels">
-      ${levels.map(([k, v, d, sub]) => `<div class="lv"><span class="label">${k}</span><b class="num ${d}">${fmt(v)}</b><span class="dist num">${sub}</span></div>`).join('')}
-    </div>
-    <div class="sizing">
-      <div><span class="label">Size</span><b class="num">${lotFmt(t.lots)} lots</b><span class="fine num">${t.qty.toFixed(2)} oz · ${money(t.notional)} notional</span></div>
-      <div><span class="label">Risk</span><b class="num down">${money(-t.riskAmt)}</b><span class="fine">${state.settings.riskPct}% of balance</span></div>
-      <div><span class="label">Reward at TP 2</span><b class="num up">${money(t.rewardAmt)}</b><span class="fine">before fees</span></div>
-    </div>
-    ${t.waitingFor ? `<p class="t-wait"><span class="label">Before entering, wait for</span>${esc(t.waitingFor)}</p>` : ''}
-    <details class="why-wrap">
-      <summary>Why this position</summary>
-      <ul class="why">${why(checks)}${why(reasons)}</ul>
-      <p class="fine">Stop ${esc(t.stopReason)}. Take profit 2 is ${esc(t.targetReason)}. Close part of the position at take profit 1 and move the stop to entry.</p>
-    </details>
-    ${recordHtml}
-    ${demo}
-    <footer class="t-actions">
-      <button type="button" class="btn-primary" data-act="take" data-id="${id}">I took it</button>
-      <button type="button" class="btn-quiet" data-act="copy" data-id="${id}">Copy levels</button>
-      <button type="button" class="btn-quiet" data-act="refresh" data-id="${id}">Refresh</button>
-    </footer>
-  </article>`;
-}
-
-$('#thread').addEventListener('click', async e => {
-  const b = e.target.closest('button[data-act]');
-  if (!b) return;
-  const t = state.tickets.get(b.dataset.id);
-  if (!t) return;
-  if (b.dataset.act === 'refresh') { await position(t.tf); return; }
-  if (b.dataset.act === 'copy') {
-    const text = `XAU/USD ${t.dir > 0 ? 'BUY' : 'SELL'} (${t.tf})\nEntry ${fmt(t.entry)}\nSL ${fmt(t.stop)} (${usd(t.stop - t.entry)})\nTP1 ${fmt(t.tp1)} (${usd(t.tp1 - t.entry)})\nTP2 ${fmt(t.tp2)} (${usd(t.tp2 - t.entry)})\nSize ${lotFmt(t.lots)} lots / ${t.qty.toFixed(2)} oz (${money(t.riskAmt)} risk)`;
-    try { await navigator.clipboard.writeText(text); toast('Levels copied'); } catch { toast('Copy is blocked in this browser'); }
-    return;
-  }
-  if (b.dataset.act === 'take') {
-    const trade = {
-      id: crypto.randomUUID(), date: localNow(), openedAt: Date.now(), symbol: t.symbol,
-      side: t.dir > 0 ? 'long' : 'short', setup: t.setup, tf: t.tf,
-      entry: t.entry, stop: t.stop, tp1: t.tp1, target: t.tp2, exit: null,
-      qty: +t.qty.toPrecision(6), fees: 0, notes: '', followedPlan: t.verdict === 'go',
-      status: 'open', demo: t.source === 'demo',
-    };
-    state.trades.push(trade);
-    J.saveTrades(state.trades);
-    b.disabled = true; b.textContent = 'Tracking';
-    renderRail();
-    toast(t.verdict === 'go' ? 'Position tracked' : 'Tracked, and marked as taken before the rules said go');
-    sync();
-  }
+$('#setup-form').addEventListener('input', setupHint);
+$('#setup-form').addEventListener('submit', e => {
+  e.preventDefault();
+  const balance = parseFloat($('#f-balance').value);
+  if (!(balance > 0)) { toast('Enter your account balance'); return; }
+  state.settings = { ...state.settings, balance, lots: Math.max(0.01, parseFloat($('#f-lots').value) || 0.03), riskPct: parseFloat($('#f-risk').value) || 2, sizing: 'fixed', configured: true };
+  J.saveSettings(state.settings);
+  try { if (Notification.permission === 'default') Notification.requestPermission(); } catch { /* unsupported */ }
+  showBoard();
 });
+$('#settings-btn').addEventListener('click', () => showSetup(true));
 
-/* ---------- positions ---------- */
-function renderRail() {
-  renderToday();
-  const open = state.trades.filter(t => J.tradeResult(t).open).sort((a, b) => (b.openedAt || 0) - (a.openedAt || 0));
-  const closed = state.trades.filter(t => !J.tradeResult(t).open).sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
-  $('#positions').innerHTML = open.length || closed.length
-    ? [...open.map(posRow), ...closed.map(posRow)].join('')
-    : '<p class="empty">No positions yet. Ask for a position and press “I took it” to track it here.</p>';
-  const s = J.stats(state.trades);
-  $('#record').innerHTML = `
-    <div><span class="label">Closed</span><b class="num">${s.closed}</b></div>
-    <div><span class="label">Win rate</span><b class="num">${s.winRate == null ? '–' : pct(s.winRate)}</b></div>
-    <div><span class="label">Net</span><b class="num ${s.net > 0 ? 'up' : s.net < 0 ? 'down' : ''}">${money(s.net)}</b></div>
-    <div><span class="label">Avg R</span><b class="num ${s.avgR > 0 ? 'up' : s.avgR < 0 ? 'down' : ''}">${s.avgR == null ? '–' : `${s.avgR.toFixed(2)}R`}</b></div>`;
+/* ---------- data ---------- */
+async function loadHistory() {
+  state.loading = 0.01;
+  render();
+  const hist = await fetchHistory(GOLD, '15m', HISTORY_DAYS, p => { state.loading = p; renderRecord(); });
+  if (hist && hist.length) { state.candles = hist; state.source = 'live'; }
+  else { state.candles = demoCandles(GOLD, '15m', 96 * HISTORY_DAYS); state.source = 'demo'; }
+  state.loading = 0;
+  recompute();
 }
 
-function posRow(t) {
-  const r = J.tradeResult(t);
-  const dir = t.side === 'short' ? -1 : 1;
-  const now = state.prices[t.symbol];
-  let pnl = r.pnl, rr = r.r;
-  if (r.open && now) { pnl = (now - t.entry) * dir * t.qty; rr = ((now - t.entry) * dir) / Math.abs(t.entry - t.stop); }
-  const status = r.open ? (t.demo ? 'Demo' : 'Open') : t.status === 'tp' ? 'Target hit' : t.status === 'sl' ? 'Stopped' : 'Closed';
-  const showPnl = !r.open || now;
-  return `<div class="pos" data-open="${r.open}">
-    <div class="pos-top">
-      <span class="pos-sym">${t.symbol === GOLD ? 'XAU/USD' : esc(t.symbol)}</span>
-      <span class="pos-side ${dir > 0 ? 'up' : 'down'}">${dir > 0 ? 'Long' : 'Short'}</span>
-      <span class="pos-status" data-s="${r.open ? 'open' : t.status || 'manual'}">${status}</span>
-    </div>
-    <div class="pos-mid num">
-      <span>${fmt(t.entry)} → ${r.open ? (now ? fmt(now) : '…') : fmt(t.exit)}</span>
-      <b class="${showPnl && pnl > 0 ? 'up' : showPnl && pnl < 0 ? 'down' : ''}">${showPnl ? `${money(pnl)}${rr == null ? '' : ` · ${rr > 0 ? '+' : ''}${rr.toFixed(2)}R`}` : '–'}</b>
-    </div>
-    <div class="pos-lv num">SL ${fmt(t.stop)} · TP ${fmt(t.target)}</div>
-    <div class="pos-act">
-      ${r.open ? `<input type="number" step="any" aria-label="Exit price for ${esc(t.symbol)}" placeholder="Exit price" value="${now ? +now.toPrecision(8) : ''}" data-exit="${t.id}">
-      <button type="button" class="btn-quiet" data-close="${t.id}">Close</button>` : ''}
-      <button type="button" class="link" data-remove="${t.id}">Remove</button>
-    </div>
+async function refreshRecent() {
+  if (state.source !== 'live') return;
+  const res = await fetchCandles(GOLD, '15m', 200);
+  if (res.source !== 'live') return;
+  const byTime = new Map(state.candles.slice(-400).map(c => [c.time, c]));
+  for (const c of res.candles) byTime.set(c.time, c);
+  state.candles = [...state.candles.slice(0, -400), ...[...byTime.values()].sort((a, b) => a.time - b.time)];
+  recompute();
+}
+
+function recompute() {
+  state.days = playDays(state.candles);
+  setFeed(state.source === 'live' ? 'live' : 'demo');
+  alerts();
+  render();
+}
+
+async function refreshPrice() {
+  const tk = await fetchTicker(GOLD);
+  if (!tk) return;
+  state.price = tk.price;
+  $('#price').textContent = fmt(tk.price);
+  const t = today();
+  if (t && t.phase === 'open') renderToday();
+}
+
+/* ---------- money ---------- */
+const s$ = v => `${v < 0 ? '−' : ''}$${Math.abs(v).toFixed(2)}`;
+function sizing(risk) {
+  const { lots, balance, riskPct } = state.settings;
+  const riskUsd = risk * 100 * lots;
+  const pctOf = balance > 0 ? (riskUsd / balance) * 100 : null;
+  const fit = balance > 0 ? Math.floor((balance * riskPct / 100) / (risk * 100) * 100) / 100 : null;
+  return { lots, riskUsd, pctOf, fit, tooBig: pctOf != null && pctOf > riskPct };
+}
+
+/* ---------- today ---------- */
+function today() {
+  const key = server(Date.now()).day;
+  return state.days.find(d => d.day === key) || null;
+}
+const local = hour => new Date(serverHourToMs(Date.now(), hour)).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+
+function render() {
+  if ($('#board').hidden) return;
+  renderAlertBar();
+  renderToday();
+  renderRecord();
+  renderHistory();
+}
+
+function renderToday() {
+  const el = $('#today');
+  const now = server(Date.now());
+  const d = today();
+  const times = `Range ${local(RULES.rangeStart)}–${local(RULES.rangeEnd)} · orders until ${local(RULES.closeHour)} (your time)`;
+
+  if (!state.candles) { el.dataset.state = 'idle'; el.innerHTML = `<p class="kicker">Today</p><h1 class="title">Loading gold prices…</h1>`; return; }
+  if (now.weekday === 'Sat' || now.weekday === 'Sun') {
+    el.dataset.state = 'idle';
+    el.innerHTML = `<p class="kicker">Today</p><h1 class="title">Market closed</h1><p class="lead">Gold is closed for the weekend. Monday’s range starts at ${local(RULES.rangeStart)} your time.</p>`;
+    return;
+  }
+  if (!d || d.phase === 'range') {
+    const r = d && d.range;
+    const mins = Math.max(0, Math.round((serverHourToMs(Date.now(), RULES.rangeEnd) - Date.now()) / 60000));
+    el.dataset.state = 'idle';
+    el.innerHTML = `
+      <p class="kicker">Today · ${times}</p>
+      <h1 class="title">${now.hour < RULES.rangeStart ? 'Waiting for the range' : 'Building today’s range'}</h1>
+      <p class="lead">${now.hour < RULES.rangeStart ? `The range starts at ${local(RULES.rangeStart)}.` : `Orders are ready in ${mins >= 60 ? `${Math.floor(mins / 60)}h ${mins % 60}m` : `${mins} min`}, at ${local(RULES.rangeEnd)}. Nothing to do until then.`}</p>
+      ${r ? `<div class="range num"><span>High so far <b>${fmt(r.high)}</b></span><span>Low so far <b>${fmt(r.low)}</b></span></div>` : ''}
+      <p class="meta">Keep this page open. It sounds an alert when your orders are ready.</p>`;
+    return;
+  }
+  if (d.phase === 'skip') {
+    el.dataset.state = 'skip';
+    el.innerHTML = `<p class="kicker">Today · ${times}</p><h1 class="title">No trade today</h1><p class="lead">${esc(d.skip)}</p><p class="meta">Skipping days like this is part of the rule. Next range starts tomorrow at ${local(RULES.rangeStart)}.</p>`;
+    return;
+  }
+  if (d.phase === 'pending') {
+    const L = d.long, S = d.short;
+    el.dataset.state = 'pending';
+    el.innerHTML = `
+      <p class="kicker">Today · ${times}</p>
+      <h1 class="title">Place these 2 orders now</h1>
+      <p class="lead">Gold is about to break out of today’s range (${d.range.pct.toFixed(2)}% of price). One order will fill. <b>When it does, cancel the other.</b></p>
+      <div class="orders">${orderCard(L)}${orderCard(S)}</div>
+      <ol class="steps">
+        <li>Price reaches ${fmt(L.be)} (buy) or ${fmt(S.be)} (sell): move your stop to your entry price.</li>
+        <li>Not filled by ${local(RULES.closeHour)}: cancel both orders.</li>
+        <li>Still in the trade at ${local(RULES.closeHour)}: close it.</li>
+      </ol>`;
+    return;
+  }
+  const t = d.trade;
+  if (d.phase === 'open') {
+    const pnl = state.price ? (state.price - t.entry) * t.dir * 100 * state.settings.lots : null;
+    el.dataset.state = t.dir > 0 ? 'up' : 'down';
+    el.innerHTML = `
+      <p class="kicker">Today · in a trade · close by ${local(RULES.closeHour)}</p>
+      <h1 class="title ${t.dir > 0 ? 'up' : 'down'}">${t.dir > 0 ? 'BUY' : 'SELL'} is live</h1>
+      <p class="lead">${t.dir > 0 ? 'Cancel your sell stop order if you haven’t.' : 'Cancel your buy stop order if you haven’t.'}</p>
+      <p class="do">${t.beDone ? `Your stop should now be at entry, ${fmt(t.entry)}. You can’t lose on this trade any more. Target ${fmt(t.tp)}.` : `When price reaches ${fmt(t.be)}, move your stop to ${fmt(t.entry)}. Until then, the stop stays at ${fmt(t.stop)}.`}</p>
+      <dl class="levels">
+        <div><dt>Entry</dt><dd class="num">${fmt(t.entry)}</dd></div>
+        <div><dt>Stop now</dt><dd class="num down">${fmt(t.stopNow)}</dd></div>
+        <div><dt>Take profit</dt><dd class="num up">${fmt(t.tp)}</dd></div>
+        <div><dt>Open P&amp;L</dt><dd class="num ${pnl == null ? '' : pnl >= 0 ? 'up' : 'down'}">${pnl == null ? '–' : s$(pnl)}</dd></div>
+      </dl>`;
+    return;
+  }
+  if (d.phase === 'notrigger') {
+    el.dataset.state = 'skip';
+    el.innerHTML = `<p class="kicker">Today</p><h1 class="title">No breakout today</h1><p class="lead">Neither order filled before ${local(RULES.closeHour)}. Cancel both if they are still open. Next range starts tomorrow at ${local(RULES.rangeStart)}.</p>`;
+    return;
+  }
+  const usd = t.r * t.risk * 100 * state.settings.lots;
+  const how = { tp: 'Take profit hit', sl: 'Stopped out', be: 'Stopped at entry', time: `Closed at ${local(RULES.closeHour)}` }[t.how];
+  el.dataset.state = t.r > 0 ? 'up' : t.r < 0 ? 'down' : 'skip';
+  el.innerHTML = `<p class="kicker">Today · done</p><h1 class="title ${t.r > 0 ? 'up' : t.r < 0 ? 'down' : ''}">${how}</h1>
+    <p class="lead">${t.dir > 0 ? 'Buy' : 'Sell'} from ${fmt(t.entry)} closed at ${fmt(t.exit)}: <b class="num ${t.r >= 0 ? 'up' : 'down'}">${t.r >= 0 ? '+' : ''}${t.r.toFixed(2)}R (${s$(usd)} at ${state.settings.lots} lots)</b>.</p>
+    <p class="meta">${t.r < 0 ? 'That’s a normal, planned loss. The rule wins on about half its trades and makes it back on the bigger winners. No revenge trades. ' : ''}Next range starts tomorrow at ${local(RULES.rangeStart)}.</p>`;
+}
+
+function orderCard(o) {
+  const z = sizing(o.risk);
+  const buy = o.dir > 0;
+  return `<div class="order ${buy ? 'up' : 'down'}">
+    <h3>${buy ? 'BUY STOP' : 'SELL STOP'}</h3>
+    <dl>
+      <div><dt>Entry</dt><dd class="num">${fmt(o.entry)}</dd></div>
+      <div><dt>Stop loss</dt><dd class="num down">${fmt(o.stop)}</dd></div>
+      <div><dt>Take profit</dt><dd class="num up">${fmt(o.tp)}</dd></div>
+    </dl>
+    <p class="size">${z.lots} lots · risk <b class="down">${s$(z.riskUsd)}</b>${z.pctOf != null ? ` (${z.pctOf.toFixed(1)}%)` : ''} · win <b class="up">${s$(z.riskUsd * RULES.tpR)}</b></p>
+    ${z.tooBig ? `<p class="toobig">${z.fit >= 0.01 ? `Too big for your ${state.settings.riskPct}% max. Use <b>${z.fit.toFixed(2)} lots</b>.` : `Even 0.01 lots risks ${s$(o.risk)} here, more than your ${state.settings.riskPct}% max. Skip it, or accept the bigger risk knowingly.`}</p>` : ''}
   </div>`;
 }
 
-$('#positions').addEventListener('click', e => {
-  const close = e.target.closest('[data-close]');
-  const remove = e.target.closest('[data-remove]');
-  if (close) {
-    const t = state.trades.find(x => x.id === close.dataset.close);
-    const exit = parseFloat(document.querySelector(`[data-exit="${t.id}"]`).value);
-    if (!(exit > 0)) { toast('Enter the price you closed at'); return; }
-    Object.assign(t, { exit, status: 'manual' });
-    J.saveTrades(state.trades);
-    renderRail();
-    toast(`Closed ${t.symbol} at ${fmt(exit)}`);
-  } else if (remove) {
-    if (!remove.dataset.armed) {
-      remove.dataset.armed = '1'; remove.textContent = 'Confirm remove';
-      setTimeout(() => { if (remove.isConnected) { delete remove.dataset.armed; remove.textContent = 'Remove'; } }, 3000);
-      return;
-    }
-    state.trades = state.trades.filter(x => x.id !== remove.dataset.remove);
-    J.saveTrades(state.trades);
-    renderRail();
+/* ---------- track record ---------- */
+function renderRecord() {
+  const el = $('#record');
+  if (state.loading) {
+    el.innerHTML = `<h2>Testing the rule on real gold prices…</h2><div class="bar"><span style="width:${Math.round(state.loading * 100)}%"></span></div>`;
+    return;
   }
-});
-
-// Checks open positions against live prices. A position closes at its stop or
-// final target, whichever the 1-minute candles reached first (the stop if both).
-let syncing = false;
-async function sync() {
-  if (syncing) return;
-  const open = state.trades.filter(t => J.tradeResult(t).open && !t.demo && t.openedAt);
-  if (!open.length) { $('#pos-sync').textContent = ''; return; }
-  syncing = true;
-  try {
-    state.prices = { ...state.prices, ...await fetchPrices([...new Set(open.map(t => t.symbol))]) };
-    let changed = false;
-    for (const t of open) {
-      const candles = await fetchMinuteCandlesSince(t.symbol, t.openedAt);
-      if (!candles) continue;
-      const dir = t.side === 'short' ? -1 : 1;
-      for (const c of candles) {
-        // Ignore any candle that started before the position was opened.
-        if (c.time * 1000 < t.openedAt) continue;
-        const hitStop = dir > 0 ? c.low <= t.stop : c.high >= t.stop;
-        const hitTarget = dir > 0 ? c.high >= t.target : c.low <= t.target;
-        if (hitStop || hitTarget) {
-          t.exit = hitStop ? t.stop : t.target;
-          t.status = hitStop ? 'sl' : 'tp';
-          changed = true;
-          notify(`${t.symbol} ${t.side} ${hitStop ? 'hit its stop' : 'hit its target'} at ${fmt(t.exit)}.`);
-          break;
-        }
-      }
-    }
-    if (changed) J.saveTrades(state.trades);
-    $('#pos-sync').textContent = Object.keys(state.prices).length
-      ? `Live · ${new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`
-      : 'Live prices unavailable';
-    renderRail();
-  } finally { syncing = false; }
+  if (!state.days.length) { el.innerHTML = ''; return; }
+  const past = state.days.filter(d => d.day !== server(Date.now()).day);
+  const s = summarize(past);
+  const usd = past.map(d => d.trade).filter(t => t && t.how).reduce((a, t) => a + t.r * t.risk * 100 * state.settings.lots, 0);
+  const health = s.profitFactor == null ? 'idle' : s.profitFactor >= 1.2 ? 'good' : s.profitFactor >= 1 ? 'weak' : 'bad';
+  const verdict = { good: 'Working on recent gold prices', weak: 'Barely profitable recently. Trade small or wait.', bad: 'Losing on recent gold prices. Don’t trade it until this turns green.', idle: 'Not enough trades yet' }[health];
+  const months = Math.round(HISTORY_DAYS / 30);
+  el.dataset.health = health;
+  el.innerHTML = `
+    <div class="rec-head"><h2>Tested on the last ${months} months of gold</h2><span class="pill">${verdict}</span></div>
+    <div class="stats">
+      <div><span>Trades</span><b class="num">${s.n}</b></div>
+      <div><span>Won</span><b class="num">${s.winRate == null ? '–' : Math.round(s.winRate * 100) + '%'}</b></div>
+      <div><span>Profit factor</span><b class="num">${s.profitFactor == null ? '–' : isFinite(s.profitFactor) ? s.profitFactor.toFixed(2) : '∞'}</b></div>
+      <div><span>At ${state.settings.lots} lots</span><b class="num ${usd >= 0 ? 'up' : 'down'}">${s$(usd)}</b></div>
+    </div>
+    <p class="meta">${s.skipped} of ${s.days} days were skipped by the range filter. Worst losing run: ${s.maxDD.toFixed(1)}R. Profit factor is money won ÷ money lost; above 1 makes money.</p>
+    <p class="meta">The published test of the same rules: 715 trades over 3.7 years, about 49% won, profit factor 1.38, and 1.61 on unseen 2026 data. <a href="${STUDY_URL}" target="_blank" rel="noopener">Read the study</a>.</p>
+    ${state.source === 'demo' ? '<p class="demo">Live prices are unreachable on this network, so these numbers come from demo data and mean nothing.</p>' : ''}`;
 }
 
-/* ---------- news ---------- */
-async function refreshCalendar() {
-  state.calendar = await loadCalendar();
-  $('#news-src').textContent = state.calendar.source === 'live' ? 'USD · high & medium impact' : 'Fixed-schedule events only';
-  renderNews();
+function renderHistory() {
+  const list = state.days.filter(d => d.day !== server(Date.now()).day).slice(-10).reverse();
+  $('#history').innerHTML = list.map(d => {
+    const t = d.trade;
+    const date = new Date(`${d.day}T12:00:00Z`).toLocaleDateString([], { weekday: 'short', month: 'short', day: 'numeric' });
+    if (!t) return `<li><span class="h-side">–</span><span class="h-what">${date}<small>${d.phase === 'skip' ? 'Skipped by range filter' : 'No breakout'}</small></span><span class="h-res"></span></li>`;
+    const usd = t.r * t.risk * 100 * state.settings.lots;
+    const how = { tp: 'Target', sl: 'Stopped', be: 'Break-even', time: 'Closed at end of day' }[t.how];
+    return `<li><span class="h-side ${t.dir > 0 ? 'up' : 'down'}">${t.dir > 0 ? 'BUY' : 'SELL'}</span>
+      <span class="h-what">${date}<small>${how}</small></span>
+      <span class="h-res ${t.r > 0 ? 'up' : t.r < 0 ? 'down' : ''}"><b class="num">${t.r >= 0 ? '+' : ''}${t.r.toFixed(2)}R</b><small class="num">${s$(usd)}</small></span></li>`;
+  }).join('');
+  const trades = list.map(d => d.trade).filter(t => t && t.how);
+  $('#score').textContent = trades.length ? `${trades.filter(t => t.r > 0).length} of ${trades.length} won` : '';
 }
 
-function renderNews() {
-  if (!state.calendar) return;
+/* ---------- news & alerts ---------- */
+function renderAlertBar() {
+  const bar = $('#alert-bar');
   const now = Date.now();
-  const list = upcoming(state.calendar, now).slice(0, 8);
-  const fmtDay = ms => new Date(ms).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' });
-  $('#news').innerHTML = list.length ? list.map(e => {
-    const mins = (e.time - now) / 60000;
-    return `<li data-impact="${e.impact}">
-      <span class="imp" aria-label="${e.impact} impact"></span>
-      <div><b>${esc(e.title)}</b><span class="fine">${fmtDay(e.time)}${e.forecast ? ` · forecast ${esc(e.forecast)}` : ''}</span></div>
-      <span class="num when">${mins <= 0 ? 'now' : `in ${fmtIn(mins)}`}</span>
-    </li>`;
-  }).join('') : '<li class="empty">No high-impact USD events on the calendar.</li>';
-  if (state.calendar.source !== 'live') {
-    $('#news').insertAdjacentHTML('beforeend', '<li class="fine">The live calendar could not be reached, so CPI, PCE and Fed speeches are missing. Check a full economic calendar before trading.</li>');
-  }
-
-  const nextHigh = list.find(e => e.impact === 'high' && e.time > now - 30 * 60000);
-  const bar = $('#news-next');
-  if (nextHigh) {
-    const mins = (nextHigh.time - now) / 60000;
-    bar.dataset.level = mins <= 60 ? 'bad' : mins <= 240 ? 'warn' : 'ok';
-    $('#news-next-text').textContent = mins <= 0 ? `${nextHigh.title} just released` : `${nextHigh.title} in ${fmtIn(mins)}`;
-    // One heads-up 30 minutes before each high-impact release.
-    const key = `${nextHigh.title}@${nextHigh.time}`;
-    if (mins > 0 && mins <= 30 && !state.warned.has(key)) {
-      state.warned.add(key);
-      notify(`Heads up: ${nextHigh.title} in ${Math.round(mins)} minutes. Gold can move fast. Tighten or close open positions.`);
-    }
-  } else {
-    bar.dataset.level = 'none';
-    $('#news-next-text').textContent = 'No high-impact news coming up';
-  }
-
-  const cond = conditions(state.calendar, null, now).filter(c => !/in \d+ min|in \d+h|released/.test(c.text));
-  if (cond.length) $('#news-next-text').textContent += ` · ${cond[0].text.split('.')[0]}`;
+  const c = state.calendar ? conditions(state.calendar, null, now).filter(x => !/weekend|Friday/.test(x.text)) : [];
+  const dayEnd = serverHourToMs(now, RULES.closeHour);
+  const big = state.calendar ? upcoming(state.calendar, now).find(e => e.impact === 'high' && e.time > now && e.time < dayEnd) : null;
+  if (c.find(x => x.block)) { bar.textContent = c.find(x => x.block).text; bar.dataset.level = 'bad'; bar.hidden = false; }
+  else if (big) {
+    bar.textContent = `${big.title} today at ${new Date(big.time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}. Expect a fast move. If you’re in a trade before it, consider moving your stop to entry or closing.`;
+    bar.dataset.level = 'warn'; bar.hidden = false;
+  } else bar.hidden = true;
 }
 
-function newsReply() {
-  if (!state.calendar) return { title: 'Loading the calendar', lines: [{ tone: 'info', text: 'Give me a second and ask again.' }] };
-  const now = Date.now();
-  const list = upcoming(state.calendar, now).slice(0, 6);
-  const lines = list.map(e => ({
-    tone: e.impact === 'high' ? ((e.time - now) / 60000 <= 240 ? 'bad' : 'warn') : 'info',
-    text: `${e.title}: ${new Date(e.time).toLocaleString([], { weekday: 'short', hour: '2-digit', minute: '2-digit' })} (${e.time > now ? `in ${fmtIn((e.time - now) / 60000)}` : 'just released'})${e.impact === 'high' ? ', high impact' : ''}.`,
-  }));
-  if (!lines.length) lines.push({ tone: 'good', text: 'No high-impact USD events coming up.' });
-  for (const c of conditions(state.calendar, null, now)) if (!lines.some(l => l.text === c.text)) lines.push({ tone: c.tone, text: c.text });
-  lines.push({ tone: 'info', text: 'Rule of thumb: no new gold entries 60 minutes before high-impact USD news, and wait for the first 15-minute candle after it.' });
-  if (state.calendar.source !== 'live') lines.push({ tone: 'warn', text: 'The live calendar is unreachable, so CPI, PCE and Fed speeches are missing from this list.' });
-  return { title: 'News that can move gold', lines };
+// One alert per change of today's state.
+function alerts() {
+  const d = today();
+  if (!d || state.source !== 'live') return;
+  const t = d.trade;
+  const key = `${d.day}:${d.phase}:${t ? `${t.dir}:${t.beDone}:${t.how || ''}` : ''}`;
+  const last = store.get('blue-trading.alerted', '');
+  if (key === last) return;
+  store.set('blue-trading.alerted', key);
+  if (!last.startsWith(d.day) && d.phase !== 'pending') return; // no alert for states reached before the page was open
+  if (d.phase === 'pending') notify(`Gold orders ready: BUY STOP ${fmt(d.long.entry)} and SELL STOP ${fmt(d.short.entry)}. Open the page for stops and targets.`);
+  else if (d.phase === 'skip') notify('No gold trade today: the range is outside the filter.');
+  else if (d.phase === 'open' && !t.beDone) notify(`${t.dir > 0 ? 'BUY' : 'SELL'} filled at ${fmt(t.entry)}. Cancel the other order. Stop ${fmt(t.stop)}, target ${fmt(t.tp)}.`);
+  else if (d.phase === 'open' && t.beDone) notify(`Move your stop to entry now: ${fmt(t.entry)}.`);
+  else if (d.phase === 'done') notify(`Trade closed: ${t.r >= 0 ? '+' : ''}${t.r.toFixed(2)}R.`);
 }
 
-async function refreshQuote() {
-  const tk = await fetchTicker(GOLD);
-  if (!tk) return;
-  $('#gold-price').textContent = fmt(tk.price);
-  const ch = $('#gold-change');
-  ch.textContent = `${tk.changePct >= 0 ? '+' : ''}${pct(tk.changePct)} 24h`;
-  ch.className = `num ${tk.changePct >= 0 ? 'up' : 'down'}`;
-  setFeed('live', 'Live prices');
-}
-
-/* ---------- account ---------- */
-function buildAccount() {
-  const s = state.settings;
-  $('#s-balance').value = s.balance; $('#s-riskpct').value = s.riskPct;
-  $('#s-dailyloss').value = s.dailyLossPct; $('#s-maxtrades').value = s.maxTrades;
-}
-$('#account').addEventListener('input', () => {
-  const v = id => parseFloat($(id).value);
-  state.settings = {
-    balance: v('#s-balance') || 0, riskPct: v('#s-riskpct') || 0,
-    dailyLossPct: v('#s-dailyloss') || 0, maxTrades: Math.max(1, Math.round(v('#s-maxtrades') || 1)),
-  };
-  J.saveSettings(state.settings);
-  renderToday();
-});
-
-function renderToday() {
-  const today = J.todayTrades(state.trades);
-  const pnl = today.map(J.tradeResult).filter(r => !r.open).reduce((a, r) => a + r.pnl, 0);
-  const limit = state.settings.balance * state.settings.dailyLossPct / 100;
-  const used = limit ? Math.min(1, Math.max(0, -pnl / limit)) : 0;
-  $('#today').innerHTML = `
-    <div class="today-row"><span class="label">Today</span><b class="num ${pnl > 0 ? 'up' : pnl < 0 ? 'down' : ''}">${money(pnl)}</b><span class="num fine">${today.length} / ${state.settings.maxTrades} trades</span></div>
-    <div class="bar" role="meter" aria-label="Daily loss limit used" aria-valuenow="${Math.round(used * 100)}" aria-valuemin="0" aria-valuemax="100"><span style="width:${used * 100}%" data-level="${used >= 1 ? 'bad' : used >= 0.6 ? 'warn' : 'ok'}"></span></div>
-    <p class="fine">${used >= 1 ? 'Daily loss limit reached. Stop for today.' : `Loss limit ${money(-limit)} · ${Math.round(used * 100)}% used`}</p>`;
-}
-
-/* ---------- alerts & backup ---------- */
-$('#alerts').checked = store.get('blue-trading.alerts', '0') === '1';
-$('#alerts').addEventListener('change', async e => {
-  store.set('blue-trading.alerts', e.target.checked ? '1' : '0');
-  if (!e.target.checked) return;
-  try { if (Notification.permission === 'default') await Notification.requestPermission(); } catch { /* unsupported */ }
-  toast('Alerts on. Keep this tab open to receive them.');
-});
 function notify(text) {
   toast(text);
-  if (!$('#alerts').checked) return;
   try {
     const ctx = notify.ctx || (notify.ctx = new AudioContext());
-    const o = ctx.createOscillator(), g = ctx.createGain();
-    o.frequency.value = 880; g.gain.setValueAtTime(0.15, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.4);
-    o.connect(g).connect(ctx.destination); o.start(); o.stop(ctx.currentTime + 0.4);
+    for (const [f, at] of [[880, 0], [1175, 0.18]]) {
+      const o = ctx.createOscillator(), g = ctx.createGain();
+      o.frequency.value = f;
+      g.gain.setValueAtTime(0.14, ctx.currentTime + at);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + at + 0.3);
+      o.connect(g).connect(ctx.destination); o.start(ctx.currentTime + at); o.stop(ctx.currentTime + at + 0.3);
+    }
   } catch { /* audio blocked */ }
-  try { if (Notification.permission === 'granted') new Notification('Blue Trading Desk', { body: text }); } catch { /* unsupported */ }
+  try { if (Notification.permission === 'granted') new Notification('Blue Trading Gold', { body: text }); } catch { /* unsupported */ }
 }
-
-$('#export-csv').addEventListener('click', () => download('blue-trading-positions.csv', J.toCSV(state.trades), 'text/csv'));
-$('#export-json').addEventListener('click', () => download('blue-trading-backup.json', JSON.stringify({ trades: state.trades, settings: state.settings }, null, 2), 'application/json'));
-$('#import-json').addEventListener('change', async e => {
-  const file = e.target.files[0];
-  if (!file) return;
-  try {
-    const data = JSON.parse(await file.text());
-    const trades = Array.isArray(data) ? data : data.trades;
-    if (!Array.isArray(trades)) throw new Error('no positions found in that file');
-    state.trades = trades;
-    J.saveTrades(trades);
-    if (data.settings) { state.settings = { ...J.DEFAULT_SETTINGS, ...data.settings }; J.saveSettings(state.settings); buildAccount(); }
-    renderRail();
-    toast(`Restored ${trades.length} positions`);
-  } catch (err) { toast(`Could not restore: ${err.message}`); }
-  e.target.value = '';
-});
 
 /* ---------- utils ---------- */
-function ctx() { return { analysis: null, symbol: state.symbol, tf: state.tf, trades: state.trades, settings: state.settings, risk: null }; }
-function setFeed(kind, text) { const f = $('#feed'); f.dataset.state = kind; f.querySelector('span').textContent = text; }
+function setFeed(kind) { $('#feed').dataset.state = kind; $('#feed').title = { live: 'Live prices', demo: 'Demo prices', loading: 'Loading…' }[kind] || ''; }
 function esc(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
-function localNow() { const d = new Date(); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0, 16); }
-function lotFmt(l) { return l >= 0.01 ? (Math.floor(l * 100) / 100).toFixed(2) : l.toFixed(3); }
-function usd(d) { return `${d >= 0 ? '+' : '−'}$${Math.abs(d).toFixed(2)}`; }
-function download(name, text, type) {
-  const url = URL.createObjectURL(new Blob([text], { type }));
-  const a = Object.assign(document.createElement('a'), { href: url, download: name });
-  document.body.append(a); a.click(); a.remove();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
-}
 let toastTimer;
 function toast(text) {
   const t = $('#toast');
   t.textContent = text; t.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => { t.hidden = true; }, 3000);
+  toastTimer = setTimeout(() => { t.hidden = true; }, 6000);
 }
 
 /* ---------- boot ---------- */
-buildComposer();
-buildAccount();
-renderRail();
-say(`<div class="note intro"><h3>Ask me for a gold position.</h3><p>Pick a timeframe and press <b>Get position</b>, or type something like <b>15m</b>, <b>scalp</b> or <b>4h swing</b>. I read the live gold chart and reply with the entry, stop, take profits and lot size for your account. I hold you back when high-impact USD news is close, and I can tell you what news is coming.</p></div>`);
-refreshCalendar();
-refreshQuote();
-sync();
-setInterval(sync, 30000);
-setInterval(refreshQuote, 15000);
-setInterval(renderNews, 60000);
-setInterval(refreshCalendar, 30 * 60000);
+if (state.settings.configured) showBoard(); else showSetup();
+loadHistory();
+loadCalendar().then(c => { state.calendar = c; renderAlertBar(); });
+refreshPrice();
+setInterval(refreshRecent, 30000);
+setInterval(refreshPrice, 10000);
+setInterval(() => { if (!$('#board').hidden) { renderToday(); renderAlertBar(); } }, 60000);
+setInterval(() => loadCalendar().then(c => { state.calendar = c; }), 30 * 60000);
