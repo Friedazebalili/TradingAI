@@ -1,0 +1,2017 @@
+{% comment %}
+  Acumen Disc Hero Slider
+  Shopify Debut-compatible standalone homepage section.
+
+  IMPORTANT: setting IDs and the "slide" block type must stay unchanged,
+  otherwise images and text already saved in the theme editor are lost.
+{% endcomment %}
+
+<style>
+  #shopify-section-{{ section.id }} {
+    --acumen-hero-navy: {{ section.settings.navy }};
+    --acumen-hero-navy-2: {{ section.settings.navy_secondary }};
+    --acumen-hero-gold: {{ section.settings.gold }};
+    --acumen-hero-gold-2: {{ section.settings.gold_light }};
+    --acumen-hero-ink: {{ section.settings.ink }};
+    --acumen-hero-muted: {{ section.settings.muted }};
+    --acumen-hero-soft: {{ section.settings.soft }};
+    --acumen-hero-max: {{ section.settings.max_width }}px;
+    --acumen-hero-height: calc(100svh - var(--acumen-fixed-header-height, 0px) - 92px);
+    --acumen-hero-mobile-height: calc(100svh - var(--acumen-fixed-header-height, 0px) - 76px);
+  }
+
+  @supports (height: 100dvh) {
+    #shopify-section-{{ section.id }} {
+      --acumen-hero-height: calc(100dvh - var(--acumen-fixed-header-height, 0px) - 92px);
+      --acumen-hero-mobile-height: calc(100dvh - var(--acumen-fixed-header-height, 0px) - 76px);
+    }
+  }
+
+  #shopify-section-{{ section.id }} * {
+    box-sizing: border-box;
+  }
+
+  #shopify-section-{{ section.id }}{
+    margin-top:0!important;
+    padding-top:0!important;
+  }
+
+  .acumen-hero {
+    position: relative;
+    width: 100%;
+    margin:0!important;
+    overflow: hidden;
+    background: var(--acumen-hero-navy);
+    isolation: isolate;
+  }
+
+  /* JS sets this from the real fixed-header height. */
+  #shopify-section-{{ section.id }}{
+    padding-top:var(--acumen-hero-header-gap, 0px)!important;
+  }
+
+  .acumen-hero__slides {
+    position: relative;
+    width: 100%;
+    min-height: var(--acumen-hero-height);
+  }
+
+  .acumen-hero__slide {
+    position: absolute;
+    inset: 0;
+    min-height: var(--acumen-hero-height);
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+    transform: translateX(22px);
+    transition:
+      opacity .55s ease,
+      transform .65s cubic-bezier(.2,.7,.2,1),
+      visibility .55s ease;
+    z-index: 0;
+  }
+
+  .acumen-hero__slide.is-active {
+    position: relative;
+    opacity: 1;
+    visibility: visible;
+    pointer-events: auto;
+    transform: translateX(0);
+    z-index: 1;
+  }
+
+  .acumen-hero__background {
+    position: absolute;
+    inset: 0;
+    z-index: -3;
+    background-color: var(--slide-bg, var(--acumen-hero-navy));
+    overflow: hidden;
+  }
+
+  .acumen-hero__background picture {
+    position: absolute;
+    inset: 0;
+    display: block;
+  }
+
+  .acumen-hero__background-image {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: var(--desktop-position, center center);
+    transform: scale(1.015);
+    transition: transform 7s ease;
+  }
+
+  .acumen-hero__slide.is-active .acumen-hero__background-image {
+    transform: scale(1.045);
+  }
+
+  /* Only a mobile background was uploaded: keep desktop on the fallback color. */
+  .acumen-hero__background-image.is-mobile-only {
+    display: none;
+  }
+
+  .acumen-hero__overlay {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+    pointer-events: none;
+    background:
+      linear-gradient(
+        90deg,
+        rgba(4,19,39,var(--overlay-left,.92)) 0%,
+        rgba(4,19,39,var(--overlay-mid,.78)) 46%,
+        rgba(4,19,39,var(--overlay-right,.32)) 100%
+      );
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__overlay {
+    background:
+      linear-gradient(
+        90deg,
+        rgba(246,248,251,var(--overlay-left,.98)) 0%,
+        rgba(246,248,251,var(--overlay-mid,.94)) 50%,
+        rgba(246,248,251,var(--overlay-right,.72)) 100%
+      );
+  }
+
+  .acumen-hero__texture {
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+    opacity: .22;
+    background-image:
+      linear-gradient(rgba(255,255,255,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255,255,255,.035) 1px, transparent 1px);
+    background-size: 36px 36px;
+    mask-image: linear-gradient(90deg, rgba(0,0,0,.45), transparent 75%);
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__texture {
+    background-image:
+      linear-gradient(rgba(7,31,63,.035) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(7,31,63,.035) 1px, transparent 1px);
+  }
+
+  .acumen-hero__inner {
+    width: min(calc(100% - 48px), var(--acumen-hero-max));
+    min-height: var(--acumen-hero-height);
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: minmax(0,1.02fr) minmax(330px,.78fr);
+    align-items: center;
+    gap: 62px;
+    padding: 54px 0 76px;
+  }
+
+  .acumen-hero__inner.is-single {
+    grid-template-columns: minmax(0,780px);
+  }
+
+  .acumen-hero__content {
+    position: relative;
+    z-index: 3;
+    max-width: 760px;
+  }
+
+  .acumen-hero__content.align-center {
+    text-align: center;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .acumen-hero__content.align-center .acumen-hero__proof,
+  .acumen-hero__content.align-center .acumen-hero__checks,
+  .acumen-hero__content.align-center .acumen-hero__actions {
+    justify-content: center;
+  }
+
+  .acumen-hero__content.align-right {
+    text-align: right;
+    margin-left: auto;
+  }
+
+  .acumen-hero__content.align-right .acumen-hero__proof,
+  .acumen-hero__content.align-right .acumen-hero__checks,
+  .acumen-hero__content.align-right .acumen-hero__actions {
+    justify-content: flex-end;
+  }
+
+  .acumen-hero__eyebrow {
+    margin: 0 0 13px;
+    color: var(--acumen-hero-gold-2);
+    font-size: 11px;
+    line-height: 1.2;
+    font-weight: 850;
+    letter-spacing: .11em;
+    text-transform: uppercase;
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__eyebrow {
+    color: #a96500;
+  }
+
+  .acumen-hero__heading {
+    margin: 0;
+    color: #fff;
+    font-size: clamp(45px,5vw,72px);
+    line-height: .98;
+    letter-spacing: -.045em;
+    font-weight: 850;
+    max-width: 820px;
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__heading {
+    color: var(--acumen-hero-navy);
+  }
+
+  .acumen-hero__heading span {
+    color: var(--acumen-hero-gold-2);
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__heading span {
+    color: #bf7600;
+  }
+
+  .acumen-hero__description {
+    max-width: 660px;
+    margin: 22px 0 0;
+    color: rgba(255,255,255,.78);
+    font-size: 16px;
+    line-height: 1.7;
+  }
+
+  .acumen-hero__description p {
+    margin: 0;
+  }
+
+  .acumen-hero__description p + p {
+    margin-top: .6em;
+  }
+
+  .acumen-hero__content.align-center .acumen-hero__description {
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .acumen-hero__content.align-right .acumen-hero__description {
+    margin-left: auto;
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__description {
+    color: #53667d;
+  }
+
+  .acumen-hero__proof {
+    margin-top: 22px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .acumen-hero__proof span {
+    min-height: 34px;
+    padding: 8px 11px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(255,255,255,.06);
+    color: rgba(255,255,255,.88);
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 10px;
+    font-weight: 750;
+    line-height: 1.2;
+    backdrop-filter: blur(8px);
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__proof span {
+    border-color: #dfe7ef;
+    background: #fff;
+    color: #40546c;
+  }
+
+  .acumen-hero__proof svg {
+    width: 15px;
+    height: 15px;
+    color: var(--acumen-hero-gold-2);
+    flex: 0 0 auto;
+  }
+
+  .acumen-hero__checks {
+    list-style: none;
+    margin: 24px 0 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 9px 18px;
+  }
+
+  .acumen-hero__checks li {
+    color: rgba(255,255,255,.86);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__checks li {
+    color: #43566d;
+  }
+
+  .acumen-hero__checks svg {
+    width: 15px;
+    height: 15px;
+    flex: 0 0 auto;
+    color: var(--acumen-hero-gold);
+  }
+
+  .acumen-hero__actions {
+    margin-top: 30px;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .acumen-hero__btn {
+    min-height: 48px;
+    padding: 0 20px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 9px;
+    text-decoration: none;
+    border-radius: {{ section.settings.button_radius }}px;
+    font-size: 11px;
+    line-height: 1;
+    font-weight: 900;
+    letter-spacing: .01em;
+    transition:
+      transform .2s ease,
+      box-shadow .2s ease,
+      background .2s ease,
+      border-color .2s ease;
+  }
+
+  .acumen-hero__btn:hover {
+    transform: translateY(-2px);
+    text-decoration: none;
+  }
+
+  .acumen-hero__btn--primary {
+    color: #172032;
+    background: linear-gradient(135deg,var(--acumen-hero-gold),var(--acumen-hero-gold-2));
+    border: 1px solid transparent;
+    box-shadow: 0 12px 25px rgba(232,154,7,.22);
+  }
+
+  .acumen-hero__btn--primary:hover {
+    color: #172032;
+    box-shadow: 0 16px 30px rgba(232,154,7,.3);
+  }
+
+  .acumen-hero__btn--secondary {
+    color: #fff;
+    background: rgba(255,255,255,.05);
+    border: 1px solid rgba(255,255,255,.28);
+    backdrop-filter: blur(8px);
+  }
+
+  .acumen-hero__btn--secondary:hover {
+    background: rgba(255,255,255,.1);
+    color: #fff;
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__btn--secondary {
+    color: var(--acumen-hero-navy);
+    background: #fff;
+    border-color: #dbe3ec;
+  }
+
+  .acumen-hero__visual {
+    position: relative;
+    z-index: 2;
+    min-height: 560px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding: 10px 0;
+  }
+
+  .acumen-hero__visual::before {
+    content: "";
+    position: absolute;
+    width: 88%;
+    height: 56%;
+    right: 0;
+    bottom: 4%;
+    background: radial-gradient(ellipse at center,rgba(0,0,0,.24),transparent 70%);
+    filter: blur(20px);
+    pointer-events: none;
+  }
+
+  .acumen-hero__first-product-callout {
+    position: absolute;
+    left: 50%;
+    bottom: -4px;
+    z-index: 5;
+    min-width: 240px;
+    max-width: 280px;
+    padding: 14px 16px;
+    border: 1px solid rgba(255,255,255,.16);
+    border-radius: 12px;
+    background: rgba(7,31,63,.94);
+    color: #fff;
+    box-shadow: 0 14px 30px rgba(0,0,0,.18);
+    backdrop-filter: blur(10px);
+    transform: translateX(-42%);
+  }
+
+  .acumen-hero__first-product-callout__row {
+    display: flex;
+    align-items: flex-start;
+    gap: 11px;
+  }
+
+  .acumen-hero__first-product-callout__dot {
+    width: 11px;
+    height: 11px;
+    flex: 0 0 11px;
+    margin-top: 3px;
+    border-radius: 50%;
+    background: var(--acumen-hero-gold-2);
+    box-shadow: 0 0 0 4px rgba(255,181,40,.10);
+  }
+
+  .acumen-hero__first-product-callout strong,
+  .acumen-hero__first-product-callout small {
+    display: block;
+  }
+
+  .acumen-hero__first-product-callout strong {
+    font-size: 12px;
+    line-height: 1.3;
+    font-weight: 850;
+    letter-spacing: -.01em;
+  }
+
+  .acumen-hero__first-product-callout small {
+    margin-top: 4px;
+    color: rgba(255,255,255,.68);
+    font-size: 9px;
+    line-height: 1.45;
+  }
+
+  .acumen-hero__product-image {
+    position: relative;
+    z-index: 2;
+    display: block;
+    width: auto;
+    height: auto;
+    max-width: 100%;
+    max-height: min(590px, calc(var(--acumen-hero-height) - 90px));
+    object-fit: contain;
+    object-position: center center;
+    filter: drop-shadow(0 26px 34px rgba(0,0,0,.26));
+    transform: translateX(20px);
+    transition: transform .45s ease;
+  }
+
+  .acumen-hero__slide.is-active .acumen-hero__product-image {
+    animation: acumenHeroProductIn .7s cubic-bezier(.2,.7,.2,1) both;
+  }
+
+
+  .acumen-hero__stage-label {
+    position: absolute;
+    right: 0;
+    bottom: 26px;
+    z-index: 4;
+    max-width: 255px;
+    padding: 13px 15px;
+    border: 1px solid rgba(255,255,255,.16);
+    background: rgba(7,31,63,.72);
+    color: #fff;
+    backdrop-filter: blur(10px);
+    box-shadow: 0 14px 30px rgba(0,0,0,.18);
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__stage-label {
+    background: rgba(255,255,255,.93);
+    border-color: #e1e8ef;
+    color: var(--acumen-hero-navy);
+  }
+
+  .acumen-hero__stage-label strong,
+  .acumen-hero__stage-label small {
+    display: block;
+  }
+
+  .acumen-hero__stage-label strong {
+    font-size: 11px;
+    line-height: 1.3;
+    font-weight: 850;
+  }
+
+  .acumen-hero__stage-label small {
+    margin-top: 4px;
+    color: rgba(255,255,255,.64);
+    font-size: 9px;
+    line-height: 1.45;
+  }
+
+  .acumen-hero__slide[data-theme="light"] .acumen-hero__stage-label small {
+    color: #718096;
+  }
+
+  .acumen-hero__arrow {
+    position: absolute;
+    z-index: 8;
+    top: 50%;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+    border: 1px solid rgba(255,255,255,.18);
+    border-radius: 50%;
+    background: rgba(7,31,63,.54);
+    color: #fff;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    backdrop-filter: blur(8px);
+    transition: background .2s ease, transform .2s ease, border-color .2s ease;
+  }
+
+  .acumen-hero__arrow:hover {
+    background: rgba(7,31,63,.84);
+    border-color: rgba(255,255,255,.32);
+    transform: scale(1.04);
+  }
+
+  .acumen-hero__arrow svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .acumen-hero__arrow--prev {
+    left: 20px;
+  }
+
+  .acumen-hero__arrow--next {
+    right: 20px;
+  }
+
+  .acumen-hero__pagination {
+    position: absolute;
+    z-index: 9;
+    left: 50%;
+    bottom: 24px;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 5px;
+  }
+
+  .acumen-hero__dot {
+    width: 30px;
+    height: 16px;
+    padding: 0;
+    border: 0;
+    background: transparent;
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+  }
+
+  .acumen-hero__dot span {
+    display: block;
+    width: 7px;
+    height: 3px;
+    border-radius: 99px;
+    background: rgba(255,255,255,.45);
+    transition: width .25s ease, background .25s ease;
+  }
+
+  .acumen-hero__dot.is-active span {
+    width: 22px;
+    background: var(--acumen-hero-gold-2);
+  }
+
+  .acumen-hero__progress {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    z-index: 9;
+    width: 100%;
+    height: 2px;
+    background: rgba(255,255,255,.08);
+    overflow: hidden;
+  }
+
+  .acumen-hero__progress span {
+    display: block;
+    width: 0;
+    height: 100%;
+    background: var(--acumen-hero-gold);
+  }
+
+  .acumen-hero.is-playing .acumen-hero__progress span {
+    animation: acumenHeroProgress var(--autoplay-ms) linear forwards;
+  }
+
+  @keyframes acumenHeroProgress {
+    from { width: 0; }
+    to { width: 100%; }
+  }
+
+  @keyframes acumenHeroProductIn {
+    from {
+      opacity: 0;
+      transform: translate3d(28px,14px,0) scale(.97);
+    }
+    to {
+      opacity: 1;
+      transform: translate3d(20px,0,0) scale(1);
+    }
+  }
+
+  @keyframes acumenHeroProductInMobile {
+    from {
+      opacity: 0;
+      transform: translate3d(0,16px,0) scale(.97);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /* Section scroll reveal */
+  .acumen-hero[data-reveal]:not(.acumen-reveal-visible) {
+    opacity: 0;
+  }
+
+  .acumen-hero[data-reveal="fade-up"]:not(.acumen-reveal-visible) {
+    transform: translateY(30px);
+  }
+
+  .acumen-hero[data-reveal="slide-left"]:not(.acumen-reveal-visible) {
+    transform: translateX(-36px);
+  }
+
+  .acumen-hero[data-reveal="slide-right"]:not(.acumen-reveal-visible) {
+    transform: translateX(36px);
+  }
+
+  .acumen-hero[data-reveal="pop"]:not(.acumen-reveal-visible) {
+    transform: scale(.975);
+  }
+
+  .acumen-hero[data-reveal] {
+    transition:
+      opacity .7s ease,
+      transform .8s cubic-bezier(.2,.7,.2,1);
+  }
+
+  .acumen-hero.acumen-reveal-visible {
+    opacity: 1;
+    transform: none;
+  }
+
+  @media (max-width: 1080px) {
+    .acumen-hero__inner {
+      grid-template-columns: minmax(0,1fr) minmax(280px,.7fr);
+      gap: 28px;
+    }
+
+    .acumen-hero__visual {
+      min-height: 470px;
+    }
+
+    .acumen-hero__product-image {
+      max-width: 98%;
+      max-height: 500px;
+      transform: translateX(10px);
+    }
+
+    .acumen-hero__first-product-callout {
+      left: 50%;
+      bottom: 2px;
+      min-width: 210px;
+      max-width: 240px;
+      padding: 12px 14px;
+      transform: translateX(-42%);
+    }
+
+    .acumen-hero__heading {
+      font-size: clamp(42px,5.4vw,62px);
+    }
+
+    .acumen-hero__arrow {
+      width: 40px;
+      height: 40px;
+    }
+
+    .acumen-hero__arrow--prev { left: 10px; }
+    .acumen-hero__arrow--next { right: 10px; }
+  }
+
+  /* ---------- Mobile ---------- */
+  @media (max-width: 760px) {
+    .acumen-hero__slides,
+    .acumen-hero__slide {
+      min-height: var(--acumen-hero-mobile-height);
+    }
+
+    /* Text first, then the product image + callouts in normal flow,
+       so nothing overlaps the buttons. Bottom padding leaves room
+       for the arrows and dots. */
+    .acumen-hero__inner,
+    .acumen-hero__inner.is-single {
+      width: min(calc(100% - 32px), var(--acumen-hero-max));
+      min-height: var(--acumen-hero-mobile-height);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: stretch;
+      gap: 26px;
+      padding: 36px 0 78px;
+    }
+
+    /* Background: dedicated mobile image when uploaded (via <picture>),
+       otherwise the desktop image using the mobile focal point. */
+    .acumen-hero__background-image {
+      object-position: var(--mobile-position, center center);
+      transform: none !important;
+    }
+
+    .acumen-hero__background-image.is-mobile-only {
+      display: block;
+    }
+
+    /* Uses the "Mobile overlay" slider from each slide */
+    .acumen-hero__overlay {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(4,19,39,var(--mobile-overlay,.9)) 0%,
+          rgba(4,19,39,calc(var(--mobile-overlay,.9) * .85)) 55%,
+          rgba(4,19,39,var(--mobile-overlay,.9)) 100%
+        );
+    }
+
+    .acumen-hero__slide[data-theme="light"] .acumen-hero__overlay {
+      background:
+        linear-gradient(
+          180deg,
+          rgba(246,248,251,var(--mobile-overlay,.95)) 0%,
+          rgba(246,248,251,calc(var(--mobile-overlay,.95) * .9)) 55%,
+          rgba(246,248,251,var(--mobile-overlay,.95)) 100%
+        );
+    }
+
+    .acumen-hero__texture {
+      mask-image: linear-gradient(180deg, rgba(0,0,0,.45), transparent 70%);
+    }
+
+    .acumen-hero__content {
+      position: relative;
+      z-index: 4;
+      width: 100%;
+      max-width: 560px;
+      text-align: left !important;
+      margin: 0 !important;
+      padding: 0;
+    }
+
+    .acumen-hero__content .acumen-hero__proof,
+    .acumen-hero__content .acumen-hero__checks,
+    .acumen-hero__content .acumen-hero__actions {
+      justify-content: start !important;
+    }
+
+    .acumen-hero__eyebrow {
+      margin: 0 0 10px;
+      font-size: 10px;
+      line-height: 1.3;
+      letter-spacing: .12em;
+    }
+
+    .acumen-hero__heading {
+      max-width: 100%;
+      font-size: clamp(32px,9.6vw,44px);
+      line-height: 1.04;
+      letter-spacing: -.035em;
+      overflow-wrap: break-word;
+    }
+
+    .acumen-hero__description {
+      max-width: 100%;
+      margin: 14px 0 0 !important;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    /* Benefits become a compact mobile grid */
+    .acumen-hero__proof {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 7px;
+      margin-top: 18px;
+      max-width: 440px;
+    }
+
+    .acumen-hero__proof span {
+      width: 100%;
+      min-height: 38px;
+      padding: 8px 10px;
+      font-size: 11px;
+      line-height: 1.25;
+      border-radius: 7px;
+    }
+
+    .acumen-hero__proof span:nth-child(3) {
+      grid-column: 1 / -1;
+    }
+
+    .acumen-hero__checks {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 9px;
+      margin-top: 18px;
+      max-width: 440px;
+    }
+
+    .acumen-hero__checks li {
+      font-size: 12px;
+      line-height: 1.35;
+    }
+
+    .acumen-hero__actions {
+      display: grid;
+      grid-template-columns: repeat(2,minmax(0,1fr));
+      gap: 8px;
+      width: 100%;
+      max-width: 440px;
+      margin-top: 22px;
+    }
+
+    .acumen-hero__btn {
+      width: 100%;
+      min-height: 46px;
+      padding: 0 12px;
+      font-size: 11px;
+      line-height: 1.2;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    /* Product image shown in full under the text */
+    .acumen-hero__visual {
+      position: relative;
+      z-index: 2;
+      width: 100%;
+      min-height: 0;
+      height: auto;
+      padding: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      gap: 12px;
+      pointer-events: none;
+    }
+
+    .acumen-hero__visual::before {
+      width: 80%;
+      height: 40%;
+      left: 10%;
+      right: auto;
+      bottom: auto;
+      top: 38%;
+      filter: blur(16px);
+      opacity: .5;
+    }
+
+    .acumen-hero__visual picture {
+      order: 1;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+    }
+
+    .acumen-hero__product-image {
+      width: auto;
+      max-width: 92%;
+      max-height: min(320px, 42vh);
+      margin: 0 auto;
+      object-fit: contain;
+      object-position: center center;
+      filter: drop-shadow(0 18px 24px rgba(0,0,0,.24));
+      transform: none;
+    }
+
+    .acumen-hero__slide.is-active .acumen-hero__product-image {
+      animation-name: acumenHeroProductInMobile;
+    }
+
+    /* Callouts sit under the product image instead of being hidden */
+    .acumen-hero__first-product-callout,
+    .acumen-hero__stage-label {
+      position: relative;
+      left: auto;
+      right: auto;
+      bottom: auto;
+      transform: none;
+      width: 100%;
+      min-width: 0;
+      max-width: 340px;
+      margin: 0 auto;
+      padding: 11px 14px;
+      border-radius: 10px;
+    }
+
+    .acumen-hero__first-product-callout {
+      order: 2;
+    }
+
+    .acumen-hero__stage-label {
+      order: 3;
+    }
+
+    .acumen-hero__first-product-callout strong,
+    .acumen-hero__stage-label strong {
+      font-size: 12px;
+    }
+
+    .acumen-hero__first-product-callout small,
+    .acumen-hero__stage-label small {
+      font-size: 11px;
+    }
+
+    .acumen-hero__arrow {
+      top: auto;
+      bottom: 16px;
+      width: 36px;
+      height: 36px;
+      margin: 0;
+    }
+
+    .acumen-hero__arrow:hover {
+      transform: none;
+    }
+
+    .acumen-hero__arrow--prev { left: 12px; }
+    .acumen-hero__arrow--next { right: 12px; }
+
+    .acumen-hero__pagination {
+      bottom: 26px;
+    }
+
+    .acumen-hero__dot {
+      width: 25px;
+      height: 24px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .acumen-hero__inner,
+    .acumen-hero__inner.is-single {
+      width: min(calc(100% - 28px), var(--acumen-hero-max));
+      padding: 30px 0 74px;
+      gap: 22px;
+    }
+
+    .acumen-hero__heading {
+      font-size: clamp(29px,9.8vw,38px);
+    }
+
+    .acumen-hero__description {
+      font-size: 13.5px;
+    }
+
+    .acumen-hero__proof {
+      grid-template-columns: 1fr;
+      max-width: 100%;
+    }
+
+    .acumen-hero__proof span:nth-child(3) {
+      grid-column: auto;
+    }
+
+    .acumen-hero__actions {
+      grid-template-columns: 1fr;
+      max-width: 100%;
+    }
+
+    .acumen-hero__product-image {
+      max-width: 96%;
+      max-height: min(270px, 38vh);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .acumen-hero,
+    .acumen-hero__slide,
+    .acumen-hero__background-image,
+    .acumen-hero__product-image,
+    .acumen-hero__dot span,
+    .acumen-hero__arrow {
+      animation: none !important;
+      transition: none !important;
+      transform: none !important;
+    }
+
+    .acumen-hero[data-reveal] {
+      opacity: 1 !important;
+    }
+  }
+
+  .shopify-design-mode #shopify-section-{{ section.id }}{
+    scroll-margin-top:var(--acumen-fixed-header-height, 122px);
+  }
+</style>
+
+<section
+  id="AcumenHero-{{ section.id }}"
+  class="acumen-hero"
+  aria-roledescription="carousel"
+  aria-label="{{ section.settings.aria_label | escape }}"
+  data-acumen-hero
+  data-reveal="{{ section.settings.scroll_animation }}"
+  style="--autoplay-ms: {{ section.settings.autoplay_speed | times: 1000 }}ms;"
+>
+  <div class="acumen-hero__slides" data-acumen-hero-slides>
+    {% for block in section.blocks %}
+      {% assign desktop_position = block.settings.desktop_image_position | replace: '_', ' ' %}
+      {% assign mobile_position = block.settings.mobile_image_position | replace: '_', ' ' %}
+      {% if forloop.first %}{% assign img_loading = 'eager' %}{% else %}{% assign img_loading = 'lazy' %}{% endif %}
+
+      <article
+        class="acumen-hero__slide{% if forloop.first %} is-active{% endif %}"
+        data-acumen-hero-slide
+        data-index="{{ forloop.index0 }}"
+        data-theme="{{ block.settings.theme }}"
+        aria-hidden="{% if forloop.first %}false{% else %}true{% endif %}"
+        style="
+          --slide-bg: {{ block.settings.background_color }};
+          --overlay-left: {{ block.settings.overlay_left | divided_by: 100.0 }};
+          --overlay-mid: {{ block.settings.overlay_middle | divided_by: 100.0 }};
+          --overlay-right: {{ block.settings.overlay_right | divided_by: 100.0 }};
+          --mobile-overlay: {{ block.settings.mobile_overlay | divided_by: 100.0 }};
+          --desktop-position: {{ desktop_position }};
+          --mobile-position: {{ mobile_position }};
+        "
+        {{ block.shopify_attributes }}
+      >
+        <div class="acumen-hero__background" aria-hidden="true">
+          {% if block.settings.desktop_image != blank or block.settings.mobile_image != blank %}
+            <picture>
+              {% if block.settings.mobile_image != blank %}
+                <source
+                  media="(max-width: 760px)"
+                  srcset="
+                    {{ block.settings.mobile_image | img_url: '600x' }} 600w,
+                    {{ block.settings.mobile_image | img_url: '900x' }} 900w,
+                    {{ block.settings.mobile_image | img_url: '1200x' }} 1200w
+                  "
+                  sizes="100vw"
+                >
+              {% endif %}
+
+              {% if block.settings.desktop_image != blank %}
+                <source
+                  media="(min-width: 761px)"
+                  srcset="
+                    {{ block.settings.desktop_image | img_url: '900x' }} 900w,
+                    {{ block.settings.desktop_image | img_url: '1400x' }} 1400w,
+                    {{ block.settings.desktop_image | img_url: '1800x' }} 1800w,
+                    {{ block.settings.desktop_image | img_url: '2400x' }} 2400w
+                  "
+                  sizes="100vw"
+                >
+                <img
+                  class="acumen-hero__background-image"
+                  src="{{ block.settings.desktop_image | img_url: '2000x' }}"
+                  srcset="
+                    {{ block.settings.desktop_image | img_url: '600x' }} 600w,
+                    {{ block.settings.desktop_image | img_url: '900x' }} 900w,
+                    {{ block.settings.desktop_image | img_url: '1400x' }} 1400w
+                  "
+                  sizes="100vw"
+                  alt=""
+                  loading="{{ img_loading }}"
+                >
+              {% else %}
+                <img
+                  class="acumen-hero__background-image is-mobile-only"
+                  src="{{ block.settings.mobile_image | img_url: '900x' }}"
+                  alt=""
+                  loading="{{ img_loading }}"
+                >
+              {% endif %}
+            </picture>
+          {% endif %}
+        </div>
+
+        <div class="acumen-hero__overlay" aria-hidden="true"></div>
+        {% if section.settings.show_texture %}
+          <div class="acumen-hero__texture" aria-hidden="true"></div>
+        {% endif %}
+
+        <div class="acumen-hero__inner{% if block.settings.product_image == blank and block.settings.mobile_product_image == blank %} is-single{% endif %}">
+          <div class="acumen-hero__content align-{{ block.settings.text_alignment }}">
+            {% if block.settings.eyebrow != blank %}
+              <p class="acumen-hero__eyebrow">{{ block.settings.eyebrow | escape }}</p>
+            {% endif %}
+
+            {% if block.settings.heading != blank or block.settings.highlight_heading != blank %}
+              {% if forloop.first %}
+                <h1 class="acumen-hero__heading">
+              {% else %}
+                <h2 class="acumen-hero__heading">
+              {% endif %}
+                  {{ block.settings.heading | escape }}
+                  {% if block.settings.highlight_heading != blank %}
+                    <span>{{ block.settings.highlight_heading | escape }}</span>
+                  {% endif %}
+              {% if forloop.first %}
+                </h1>
+              {% else %}
+                </h2>
+              {% endif %}
+            {% endif %}
+
+            {% if block.settings.description != blank %}
+              <div class="acumen-hero__description">{{ block.settings.description }}</div>
+            {% endif %}
+
+            {% if block.settings.content_style == 'proof' %}
+              {% if block.settings.point_1 != blank or block.settings.point_2 != blank or block.settings.point_3 != blank %}
+                <div class="acumen-hero__proof" aria-label="Key benefits">
+                  {% if block.settings.point_1 != blank %}
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 17a8 8 0 1 1 16 0"></path>
+                        <path d="m12 13 4-4"></path>
+                      </svg>
+                      {{ block.settings.point_1 | escape }}
+                    </span>
+                  {% endif %}
+
+                  {% if block.settings.point_2 != blank %}
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M12 3l7 3v5c0 4.7-2.8 8.1-7 10-4.2-1.9-7-5.3-7-10V6l7-3z"></path>
+                        <path d="m9.5 12 1.7 1.7 3.5-3.7"></path>
+                      </svg>
+                      {{ block.settings.point_2 | escape }}
+                    </span>
+                  {% endif %}
+
+                  {% if block.settings.point_3 != blank %}
+                    <span>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M4 13v-2a8 8 0 0 1 16 0v2"></path>
+                        <path d="M4 13h3v6H5a1 1 0 0 1-1-1v-5zM20 13h-3v6h2a1 1 0 0 0 1-1v-5z"></path>
+                      </svg>
+                      {{ block.settings.point_3 | escape }}
+                    </span>
+                  {% endif %}
+                </div>
+              {% endif %}
+            {% elsif block.settings.content_style == 'checks' %}
+              {% if block.settings.point_1 != blank or block.settings.point_2 != blank or block.settings.point_3 != blank %}
+                <ul class="acumen-hero__checks">
+                  {% if block.settings.point_1 != blank %}
+                    <li>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m5 12 4 4L19 6"></path>
+                      </svg>
+                      {{ block.settings.point_1 | escape }}
+                    </li>
+                  {% endif %}
+                  {% if block.settings.point_2 != blank %}
+                    <li>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m5 12 4 4L19 6"></path>
+                      </svg>
+                      {{ block.settings.point_2 | escape }}
+                    </li>
+                  {% endif %}
+                  {% if block.settings.point_3 != blank %}
+                    <li>
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="m5 12 4 4L19 6"></path>
+                      </svg>
+                      {{ block.settings.point_3 | escape }}
+                    </li>
+                  {% endif %}
+                </ul>
+              {% endif %}
+            {% endif %}
+
+            {% if block.settings.primary_label != blank or block.settings.secondary_label != blank %}
+              <div class="acumen-hero__actions">
+                {% if block.settings.primary_label != blank %}
+                  <a
+                    class="acumen-hero__btn acumen-hero__btn--primary"
+                    href="{% if block.settings.primary_link != blank %}{{ block.settings.primary_link }}{% else %}#products{% endif %}"
+                  >
+                    {{ block.settings.primary_label | escape }}
+                    {% if block.settings.primary_arrow %}
+                      <span aria-hidden="true">→</span>
+                    {% endif %}
+                  </a>
+                {% endif %}
+
+                {% if block.settings.secondary_label != blank %}
+                  <a
+                    class="acumen-hero__btn acumen-hero__btn--secondary"
+                    href="{% if block.settings.secondary_link != blank %}{{ block.settings.secondary_link }}{% else %}#finder{% endif %}"
+                  >
+                    {{ block.settings.secondary_label | escape }}
+                  </a>
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+
+          {% if block.settings.product_image != blank or block.settings.mobile_product_image != blank %}
+            <div class="acumen-hero__visual" aria-hidden="true">
+              {% if forloop.first %}
+                <div class="acumen-hero__first-product-callout">
+                  <div class="acumen-hero__first-product-callout__row">
+                    <span class="acumen-hero__first-product-callout__dot" aria-hidden="true"></span>
+                    <div>
+                      <strong>Forensic &amp; Secure Workflows</strong>
+                      <small>Professional SATA HDD / SSD duplication</small>
+                    </div>
+                  </div>
+                </div>
+              {% endif %}
+
+              <picture>
+                {% if block.settings.mobile_product_image != blank %}
+                  <source
+                    media="(max-width: 760px)"
+                    srcset="
+                      {{ block.settings.mobile_product_image | img_url: '600x' }} 600w,
+                      {{ block.settings.mobile_product_image | img_url: '1000x' }} 1000w
+                    "
+                    sizes="90vw"
+                  >
+                {% endif %}
+
+                {% if block.settings.product_image != blank %}
+                  <img
+                    class="acumen-hero__product-image"
+                    src="{{ block.settings.product_image | img_url: '1600x' }}"
+                    srcset="
+                      {{ block.settings.product_image | img_url: '600x' }} 600w,
+                      {{ block.settings.product_image | img_url: '900x' }} 900w,
+                      {{ block.settings.product_image | img_url: '1200x' }} 1200w,
+                      {{ block.settings.product_image | img_url: '1600x' }} 1600w
+                    "
+                    sizes="(max-width: 760px) 90vw, 48vw"
+                    alt=""
+                    loading="{{ img_loading }}"
+                  >
+                {% else %}
+                  <img
+                    class="acumen-hero__product-image"
+                    src="{{ block.settings.mobile_product_image | img_url: '1000x' }}"
+                    alt=""
+                    loading="{{ img_loading }}"
+                  >
+                {% endif %}
+              </picture>
+
+              {% if block.settings.stage_title != blank %}
+                <div class="acumen-hero__stage-label">
+                  <strong>{{ block.settings.stage_title | escape }}</strong>
+                  {% if block.settings.stage_text != blank %}
+                    <small>{{ block.settings.stage_text | escape }}</small>
+                  {% endif %}
+                </div>
+              {% endif %}
+            </div>
+          {% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+
+  {% if section.blocks.size > 1 %}
+    {% if section.settings.show_arrows %}
+      <button class="acumen-hero__arrow acumen-hero__arrow--prev" type="button" aria-label="Previous slide" data-acumen-hero-prev>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+      </button>
+
+      <button class="acumen-hero__arrow acumen-hero__arrow--next" type="button" aria-label="Next slide" data-acumen-hero-next>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+      </button>
+    {% endif %}
+
+    {% if section.settings.show_dots %}
+      <div class="acumen-hero__pagination" role="tablist" aria-label="Choose hero slide">
+        {% for block in section.blocks %}
+          <button
+            class="acumen-hero__dot{% if forloop.first %} is-active{% endif %}"
+            type="button"
+            role="tab"
+            aria-selected="{% if forloop.first %}true{% else %}false{% endif %}"
+            aria-label="Show slide {{ forloop.index }}"
+            data-acumen-hero-dot="{{ forloop.index0 }}"
+          >
+            <span></span>
+          </button>
+        {% endfor %}
+      </div>
+    {% endif %}
+
+    {% if section.settings.autoplay and section.settings.show_progress %}
+      <div class="acumen-hero__progress" aria-hidden="true">
+        <span data-acumen-hero-progress></span>
+      </div>
+    {% endif %}
+  {% endif %}
+</section>
+
+<script>
+  (function() {
+    var hero = document.getElementById('AcumenHero-{{ section.id }}');
+    if (!hero) return;
+
+    var slides = Array.prototype.slice.call(hero.querySelectorAll('[data-acumen-hero-slide]'));
+    var dots = Array.prototype.slice.call(hero.querySelectorAll('[data-acumen-hero-dot]'));
+    var prev = hero.querySelector('[data-acumen-hero-prev]');
+    var next = hero.querySelector('[data-acumen-hero-next]');
+    var progress = hero.querySelector('[data-acumen-hero-progress]');
+    var current = 0;
+    var timer = null;
+    var autoplay = {{ section.settings.autoplay | json }};
+    var delay = {{ section.settings.autoplay_speed | times: 1000 }};
+    var pauseOnHover = {{ section.settings.pause_on_hover | json }};
+    var startX = null;
+    var startY = null;
+    var deltaX = 0;
+    var deltaY = 0;
+
+    function restartProgress() {
+      if (!progress || !autoplay) return;
+      progress.style.animation = 'none';
+      void progress.offsetWidth;
+      progress.style.animation = '';
+    }
+
+    function show(index, userInitiated) {
+      if (!slides.length) return;
+
+      if (index < 0) index = slides.length - 1;
+      if (index >= slides.length) index = 0;
+
+      slides.forEach(function(slide, i) {
+        var active = i === index;
+        slide.classList.toggle('is-active', active);
+        slide.setAttribute('aria-hidden', active ? 'false' : 'true');
+      });
+
+      dots.forEach(function(dot, i) {
+        var active = i === index;
+        dot.classList.toggle('is-active', active);
+        dot.setAttribute('aria-selected', active ? 'true' : 'false');
+      });
+
+      current = index;
+      restartProgress();
+
+      if (userInitiated) restartAutoplay();
+    }
+
+    function stopAutoplay() {
+      if (timer) {
+        window.clearInterval(timer);
+        timer = null;
+      }
+      hero.classList.remove('is-playing');
+    }
+
+    function startAutoplay() {
+      if (!autoplay || slides.length < 2) return;
+      stopAutoplay();
+      hero.classList.add('is-playing');
+      restartProgress();
+      timer = window.setInterval(function() {
+        show(current + 1, false);
+      }, delay);
+    }
+
+    function restartAutoplay() {
+      if (!autoplay) return;
+      startAutoplay();
+    }
+
+    if (prev) {
+      prev.addEventListener('click', function() {
+        show(current - 1, true);
+      });
+    }
+
+    if (next) {
+      next.addEventListener('click', function() {
+        show(current + 1, true);
+      });
+    }
+
+    dots.forEach(function(dot) {
+      dot.addEventListener('click', function() {
+        var index = parseInt(dot.getAttribute('data-acumen-hero-dot'), 10);
+        show(index, true);
+      });
+    });
+
+    hero.addEventListener('keydown', function(event) {
+      if (event.key === 'ArrowLeft') show(current - 1, true);
+      if (event.key === 'ArrowRight') show(current + 1, true);
+    });
+
+    if (pauseOnHover) {
+      hero.addEventListener('mouseenter', stopAutoplay);
+      hero.addEventListener('mouseleave', startAutoplay);
+      hero.addEventListener('focusin', stopAutoplay);
+      hero.addEventListener('focusout', startAutoplay);
+    }
+
+    /* Swipe on phones. Only a mostly-horizontal swipe changes slides,
+       so scrolling the page up/down never flips the slider. */
+    hero.addEventListener('touchstart', function(event) {
+      if (!event.touches || !event.touches[0]) return;
+      startX = event.touches[0].clientX;
+      startY = event.touches[0].clientY;
+      deltaX = 0;
+      deltaY = 0;
+    }, { passive: true });
+
+    hero.addEventListener('touchmove', function(event) {
+      if (startX === null || !event.touches || !event.touches[0]) return;
+      deltaX = event.touches[0].clientX - startX;
+      deltaY = event.touches[0].clientY - startY;
+    }, { passive: true });
+
+    hero.addEventListener('touchend', function() {
+      if (startX === null) return;
+      if (Math.abs(deltaX) > 48 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+        if (deltaX < 0) show(current + 1, true);
+        else show(current - 1, true);
+      }
+      startX = null;
+      startY = null;
+      deltaX = 0;
+      deltaY = 0;
+    }, { passive: true });
+
+    document.addEventListener('visibilitychange', function() {
+      if (document.hidden) stopAutoplay();
+      else startAutoplay();
+    });
+
+    /* Scroll reveal */
+    var reveal = hero.getAttribute('data-reveal');
+    var reducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (!reveal || reveal === 'none' || reducedMotion || !('IntersectionObserver' in window)) {
+      hero.classList.add('acumen-reveal-visible');
+    } else {
+      var observer = new IntersectionObserver(function(entries) {
+        entries.forEach(function(entry) {
+          if (entry.isIntersecting) {
+            hero.classList.add('acumen-reveal-visible');
+            observer.unobserve(hero);
+          }
+        });
+      }, {
+        threshold: 0.12
+      });
+
+      observer.observe(hero);
+    }
+
+    show(0, false);
+    startAutoplay();
+
+    document.addEventListener('shopify:block:select', function(event) {
+      var block = event.target;
+      if (!block || !hero.contains(block)) return;
+      var index = parseInt(block.getAttribute('data-index'), 10);
+      if (!isNaN(index)) {
+        stopAutoplay();
+        show(index, false);
+      }
+    });
+
+    document.addEventListener('shopify:block:deselect', function(event) {
+      if (hero.contains(event.target)) startAutoplay();
+    });
+  })();
+</script>
+
+{% schema %}
+{
+  "name": "Acumen Hero Slider",
+  "max_blocks": 6,
+  "settings": [
+    {
+      "type": "header",
+      "content": "Slider"
+    },
+    {
+      "type": "text",
+      "id": "aria_label",
+      "label": "Carousel accessibility label",
+      "default": "Acumen Disc featured solutions"
+    },
+    {
+      "type": "checkbox",
+      "id": "autoplay",
+      "label": "Autoplay slides",
+      "default": true
+    },
+    {
+      "type": "range",
+      "id": "autoplay_speed",
+      "label": "Autoplay speed",
+      "min": 3,
+      "max": 10,
+      "step": 1,
+      "unit": "s",
+      "default": 6
+    },
+    {
+      "type": "checkbox",
+      "id": "pause_on_hover",
+      "label": "Pause on hover or focus",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_arrows",
+      "label": "Show navigation arrows",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_dots",
+      "label": "Show pagination dots",
+      "default": true
+    },
+    {
+      "type": "checkbox",
+      "id": "show_progress",
+      "label": "Show autoplay progress line",
+      "default": false
+    },
+    {
+      "type": "header",
+      "content": "Section layout"
+    },
+    {
+      "type": "range",
+      "id": "desktop_height",
+      "label": "Desktop hero height",
+      "min": 520,
+      "max": 820,
+      "step": 10,
+      "unit": "px",
+      "default": 700
+    },
+    {
+      "type": "range",
+      "id": "mobile_height",
+      "label": "Mobile hero height",
+      "min": 580,
+      "max": 820,
+      "step": 10,
+      "unit": "px",
+      "default": 740
+    },
+    {
+      "type": "range",
+      "id": "max_width",
+      "label": "Content max width",
+      "min": 1100,
+      "max": 1500,
+      "step": 20,
+      "unit": "px",
+      "default": 1240
+    },
+    {
+      "type": "range",
+      "id": "button_radius",
+      "label": "Button corner radius",
+      "min": 0,
+      "max": 18,
+      "step": 1,
+      "unit": "px",
+      "default": 8
+    },
+    {
+      "type": "checkbox",
+      "id": "show_texture",
+      "label": "Show subtle technical grid",
+      "default": true
+    },
+    {
+      "type": "select",
+      "id": "scroll_animation",
+      "label": "Scroll-in animation",
+      "default": "fade-up",
+      "options": [
+        {
+          "value": "none",
+          "label": "None"
+        },
+        {
+          "value": "fade-up",
+          "label": "Fade up"
+        },
+        {
+          "value": "slide-left",
+          "label": "Slide from left"
+        },
+        {
+          "value": "slide-right",
+          "label": "Slide from right"
+        },
+        {
+          "value": "pop",
+          "label": "Pop in"
+        }
+      ]
+    },
+    {
+      "type": "header",
+      "content": "Acumen Disc colors"
+    },
+    {
+      "type": "color",
+      "id": "navy",
+      "label": "Primary navy",
+      "default": "#071f3f"
+    },
+    {
+      "type": "color",
+      "id": "navy_secondary",
+      "label": "Secondary navy",
+      "default": "#0b2b53"
+    },
+    {
+      "type": "color",
+      "id": "gold",
+      "label": "Primary gold",
+      "default": "#e89a07"
+    },
+    {
+      "type": "color",
+      "id": "gold_light",
+      "label": "Light gold",
+      "default": "#ffb528"
+    },
+    {
+      "type": "color",
+      "id": "ink",
+      "label": "Dark text",
+      "default": "#11243e"
+    },
+    {
+      "type": "color",
+      "id": "muted",
+      "label": "Muted text",
+      "default": "#64748b"
+    },
+    {
+      "type": "color",
+      "id": "soft",
+      "label": "Soft background",
+      "default": "#f6f8fb"
+    }
+  ],
+  "blocks": [
+    {
+      "type": "slide",
+      "name": "Hero slide",
+      "settings": [
+        {
+          "type": "header",
+          "content": "Images"
+        },
+        {
+          "type": "image_picker",
+          "id": "desktop_image",
+          "label": "Desktop background image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_image",
+          "label": "Mobile background image",
+          "info": "Optional. If empty, the desktop image is used on phones."
+        },
+        {
+          "type": "image_picker",
+          "id": "product_image",
+          "label": "Product image"
+        },
+        {
+          "type": "image_picker",
+          "id": "mobile_product_image",
+          "label": "Mobile product image",
+          "info": "Optional. If empty, the product image is shown on phones."
+        },
+        {
+          "type": "select",
+          "id": "desktop_image_position",
+          "label": "Desktop image position",
+          "default": "center_center",
+          "options": [
+            { "value": "left_top", "label": "Left top" },
+            { "value": "left_center", "label": "Left center" },
+            { "value": "left_bottom", "label": "Left bottom" },
+            { "value": "center_top", "label": "Center top" },
+            { "value": "center_center", "label": "Center" },
+            { "value": "center_bottom", "label": "Center bottom" },
+            { "value": "right_top", "label": "Right top" },
+            { "value": "right_center", "label": "Right center" },
+            { "value": "right_bottom", "label": "Right bottom" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "mobile_image_position",
+          "label": "Mobile image position",
+          "default": "center_center",
+          "options": [
+            { "value": "left_top", "label": "Left top" },
+            { "value": "left_center", "label": "Left center" },
+            { "value": "left_bottom", "label": "Left bottom" },
+            { "value": "center_top", "label": "Center top" },
+            { "value": "center_center", "label": "Center" },
+            { "value": "center_bottom", "label": "Center bottom" },
+            { "value": "right_top", "label": "Right top" },
+            { "value": "right_center", "label": "Right center" },
+            { "value": "right_bottom", "label": "Right bottom" }
+          ]
+        },
+        {
+          "type": "header",
+          "content": "Content"
+        },
+        {
+          "type": "text",
+          "id": "eyebrow",
+          "label": "Eyebrow",
+          "default": "Professional Data Duplication"
+        },
+        {
+          "type": "text",
+          "id": "heading",
+          "label": "Heading",
+          "default": "Reliable. Fast."
+        },
+        {
+          "type": "text",
+          "id": "highlight_heading",
+          "label": "Highlighted heading",
+          "default": "Built for Serious Workflows."
+        },
+        {
+          "type": "richtext",
+          "id": "description",
+          "label": "Description",
+          "default": "<p>Standalone duplication systems engineered for dependable USB, SD, NVMe and drive workflows — from everyday jobs to demanding technical environments.</p>"
+        },
+        {
+          "type": "select",
+          "id": "text_alignment",
+          "label": "Text alignment",
+          "default": "left",
+          "options": [
+            { "value": "left", "label": "Left" },
+            { "value": "center", "label": "Center" },
+            { "value": "right", "label": "Right" }
+          ]
+        },
+        {
+          "type": "select",
+          "id": "content_style",
+          "label": "Benefit style",
+          "default": "proof",
+          "options": [
+            { "value": "none", "label": "None" },
+            { "value": "proof", "label": "Compact proof badges" },
+            { "value": "checks", "label": "Check list" }
+          ]
+        },
+        {
+          "type": "text",
+          "id": "point_1",
+          "label": "Benefit 1",
+          "default": "High-speed workflows"
+        },
+        {
+          "type": "text",
+          "id": "point_2",
+          "label": "Benefit 2",
+          "default": "Trusted reliability"
+        },
+        {
+          "type": "text",
+          "id": "point_3",
+          "label": "Benefit 3",
+          "default": "Expert support"
+        },
+        {
+          "type": "header",
+          "content": "Buttons"
+        },
+        {
+          "type": "text",
+          "id": "primary_label",
+          "label": "Primary button label",
+          "default": "Explore Duplicators"
+        },
+        {
+          "type": "url",
+          "id": "primary_link",
+          "label": "Primary button link"
+        },
+        {
+          "type": "checkbox",
+          "id": "primary_arrow",
+          "label": "Show arrow on primary button",
+          "default": true
+        },
+        {
+          "type": "text",
+          "id": "secondary_label",
+          "label": "Secondary button label",
+          "default": "Find the Right System"
+        },
+        {
+          "type": "url",
+          "id": "secondary_link",
+          "label": "Secondary button link"
+        },
+        {
+          "type": "header",
+          "content": "Product callout"
+        },
+        {
+          "type": "text",
+          "id": "stage_title",
+          "label": "Product callout title"
+        },
+        {
+          "type": "text",
+          "id": "stage_text",
+          "label": "Product callout text"
+        },
+        {
+          "type": "header",
+          "content": "Slide appearance"
+        },
+        {
+          "type": "select",
+          "id": "theme",
+          "label": "Slide theme",
+          "default": "dark",
+          "options": [
+            { "value": "dark", "label": "Dark" },
+            { "value": "light", "label": "Light" }
+          ]
+        },
+        {
+          "type": "color",
+          "id": "background_color",
+          "label": "Fallback background",
+          "default": "#071f3f"
+        },
+        {
+          "type": "range",
+          "id": "overlay_left",
+          "label": "Desktop overlay left",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 95
+        },
+        {
+          "type": "range",
+          "id": "overlay_middle",
+          "label": "Desktop overlay middle",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 80
+        },
+        {
+          "type": "range",
+          "id": "overlay_right",
+          "label": "Desktop overlay right",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 30
+        },
+        {
+          "type": "range",
+          "id": "mobile_overlay",
+          "label": "Mobile overlay",
+          "min": 0,
+          "max": 100,
+          "step": 5,
+          "unit": "%",
+          "default": 90
+        }
+      ]
+    }
+  ],
+  "presets": [
+    {
+      "name": "Acumen Hero Slider",
+      "category": "Acumen Disc",
+      "blocks": [
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "Professional Data Duplication",
+            "heading": "Reliable. Fast.",
+            "highlight_heading": "Built for Serious Workflows.",
+            "description": "<p>Standalone duplication systems engineered for dependable USB, SD, NVMe and drive workflows — from everyday jobs to demanding technical environments.</p>",
+            "content_style": "proof",
+            "point_1": "High-speed workflows",
+            "point_2": "Trusted reliability",
+            "point_3": "Expert support",
+            "primary_label": "Explore Duplicators",
+            "secondary_label": "Find the Right System",
+            "theme": "dark",
+            "background_color": "#071f3f"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "Secure Data Management",
+            "heading": "Duplicate, Verify and",
+            "highlight_heading": "Erase with Confidence.",
+            "description": "<p>Purpose-built systems for organizations that need controlled, repeatable media handling with verification and secure erase capabilities.</p>",
+            "content_style": "proof",
+            "point_1": "Standalone operation",
+            "point_2": "Verification options",
+            "point_3": "Secure erase workflows",
+            "primary_label": "Compare Systems",
+            "secondary_label": "Talk to an Expert",
+            "stage_title": "Forensic & Secure Workflows",
+            "stage_text": "Professional SATA HDD / SSD duplication",
+            "theme": "dark",
+            "background_color": "#071f3f"
+          }
+        },
+        {
+          "type": "slide",
+          "settings": {
+            "eyebrow": "Modern Flash & SSD Workflows",
+            "heading": "Move Data Faster Across",
+            "highlight_heading": "Today’s Media.",
+            "description": "<p>Choose systems optimized for high-speed flash and SSD workflows, including USB, SD / microSD and M.2 NVMe media.</p>",
+            "content_style": "checks",
+            "point_1": "USB and memory-card duplication",
+            "point_2": "Compact M.2 NVMe workflows",
+            "point_3": "Scalable target-count options",
+            "primary_label": "Browse by Media",
+            "secondary_label": "View Best Sellers",
+            "stage_title": "Built for throughput",
+            "stage_text": "Fast, repeatable production workflows",
+            "theme": "light",
+            "background_color": "#f6f8fb",
+            "overlay_left": 95,
+            "overlay_middle": 90,
+            "overlay_right": 65
+          }
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}
